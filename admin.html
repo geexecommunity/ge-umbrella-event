@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — GE Umbrella Event</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; padding: 24px; }
+h1 { text-align: center; color: #d4a843; font-size: 1.6rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+.subtitle { text-align: center; color: #8b949e; font-size: 0.85rem; margin-bottom: 24px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; text-align: center; }
+.card .num { font-size: 2rem; font-weight: 700; color: #d4a843; }
+.card .label { font-size: 0.78rem; color: #8b949e; margin-top: 4px; }
+.bars { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+.bars h3 { font-size: 0.85rem; color: #8b949e; margin-bottom: 12px; text-transform: uppercase; }
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-label { width: 70px; font-size: 0.85rem; }
+.bar-track { flex: 1; background: #21262d; border-radius: 4px; height: 14px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+.bar-pct { width: 40px; font-size: 0.8rem; color: #8b949e; text-align: right; }
+.toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.toolbar input { flex: 1; min-width: 200px; padding: 8px 12px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 0.9rem; }
+.toolbar select { padding: 8px 12px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; font-size: 0.9rem; }
+.btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+.btn-green { background: #238636; color: #fff; }
+.btn-gray { background: #21262d; color: #e6edf3; border: 1px solid #30363d; }
+.table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #30363d; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+thead tr { background: #21262d; }
+th { padding: 12px 14px; text-align: left; color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; white-space: nowrap; }
+tbody tr { border-top: 1px solid #21262d; }
+tbody tr:hover { background: #161b22; }
+td { padding: 11px 14px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+.badge-blue { background: #1c3a6e; color: #79b8ff; }
+.badge-red { background: #4a1515; color: #ff7b72; }
+.badge-yellow { background: #3d3000; color: #f0c040; }
+.badge-green { background: #0d3a1a; color: #56d364; }
+.server-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+.time-cell { color: #8b949e; font-size: 0.8rem; }
+.status-row { text-align: center; padding: 40px; color: #8b949e; }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #30363d; border-top-color: #d4a843; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<h1>Admin Dashboard</h1>
+<p class="subtitle">GE Umbrella Event — บันทึกแห่งอาณาจักร</p>
+<div class="stats">
+  <div class="card"><div class="num" id="statTotal">-</div><div class="label">ผู้เล่นทั้งหมด</div></div>
+  <div class="card"><div class="num" id="statToday">-</div><div class="label">วันนี้</div></div>
+  <div class="card"><div class="num" id="statLeo">-</div><div class="label">Leonardo</div></div>
+  <div class="card"><div class="num" id="statSeason">-</div><div class="label">Season Server</div></div>
+</div>
+<div class="bars">
+  <h3>สัดส่วนร่มที่ชนะ</h3>
+  <div class="bar-row"><span class="bar-label" style="color:#79b8ff">น้ำเงิน</span><div class="bar-track"><div class="bar-fill" id="barBlue" style="background:#58a6ff;width:0%"></div></div><span class="bar-pct" id="pctBlue">0%</span></div>
+  <div class="bar-row"><span class="bar-label" style="color:#ff7b72">แดง</span><div class="bar-track"><div class="bar-fill" id="barRed" style="background:#ff7b72;width:0%"></div></div><span class="bar-pct" id="pctRed">0%</span></div>
+  <div class="bar-row"><span class="bar-label" style="color:#f0c040">เหลือง</span><div class="bar-track"><div class="bar-fill" id="barYellow" style="background:#f0c040;width:0%"></div></div><span class="bar-pct" id="pctYellow">0%</span></div>
+  <div class="bar-row"><span class="bar-label" style="color:#56d364">เขียว</span><div class="bar-track"><div class="bar-fill" id="barGreen" style="background:#56d364;width:0%"></div></div><span class="bar-pct" id="pctGreen">0%</span></div>
+</div>
+<div class="toolbar">
+  <input type="text" id="searchBox" placeholder="ค้นหา EXE ID..." oninput="renderTable()">
+  <select id="filterColor" onchange="renderTable()"><option value="">ร่มทุกสี</option><option value="blue">น้ำเงิน</option><option value="red">แดง</option><option value="yellow">เหลือง</option><option value="green">เขียว</option></select>
+  <select id="filterServer" onchange="renderTable()"><option value="">ทุก Server</option><option value="Leonardo">Leonardo</option><option value="Season Server">Season Server</option></select>
+  <button class="btn btn-gray" onclick="loadData()">รีเฟรช</button>
+  <button class="btn btn-green" onclick="exportCSV()">Export CSV</button>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>#</th><th>EXE ID</th><th>Server</th><th>ร่มที่ได้</th><th>ของรางวัล</th><th>เวลาที่เล่น</th></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="6" class="status-row"><span class="spinner"></span>กำลังโหลด...</td></tr></tbody>
+  </table>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+const CFG={apiKey:"AIzaSyDqbGsBIkJzxqyLF3nNSLXCFRIze5la5qU",authDomain:"granado-espada-event.firebaseapp.com",databaseURL:"https://granado-espada-event-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"granado-espada-event",storageBucket:"granado-espada-event.firebasestorage.app",messagingSenderId:"293451160037",appId:"1:293451160037:web:517d07067ae1e6affc370c"};
+firebase.initializeApp(CFG);
+const db=firebase.database();
+let all=[];
+function fmt(iso){if(!iso)return'-';const d=new Date(iso);return d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+function badge(c,l){const m={blue:'badge-blue',red:'badge-red',yellow:'badge-yellow',green:'badge-green'};const e={blue:'น้ำเงิน',red:'แดง',yellow:'เหลือง',green:'เขียว'};return '<span class="badge '+(m[c]||'')+'">'+(e[c]||c)+'</span>';}
+function loadData(){document.getElementById('tableBody').innerHTML='<tr><td colspan="6" class="status-row"><span class="spinner"></span>กำลังโหลด...</td></tr>';db.ref('umbrella_results').once('value').then(s=>{const r=s.val();all=r?Object.values(r):[];all.sort((a,b)=>(b.playedAt||0)-(a.playedAt||0));stats();renderTable();}).catch(e=>{document.getElementById('tableBody').innerHTML='<tr><td colspan="6" class="status-row">โหลดไม่สำเร็จ: '+e.message+'</td></tr>';});}
+function stats(){const td=new Date().toDateString();let t=0,l=0,s=0,cc={blue:0,red:0,yellow:0,green:0};all.forEach(p=>{if(p.playedAtISO&&new Date(p.playedAtISO).toDateString()===td)t++;if(p.server==='Leonardo')l++;if(p.server==='Season Server')s++;if(p.winnerColor)cc[p.winnerColor]=(cc[p.winnerColor]||0)+1;});const n=all.length;document.getElementById('statTotal').textContent=n;document.getElementById('statToday').textContent=t;document.getElementById('statLeo').textContent=l;document.getElementById('statSeason').textContent=s;['blue','red','yellow','green'].forEach(c=>{const pct=n>0?Math.round((cc[c]||0)/n*100):0,k=c[0].toUpperCase()+c.slice(1);document.getElementById('bar'+k).style.width=pct+'%';document.getElementById('pct'+k).textContent=pct+'%';});}
+function renderTable(){const q=document.getElementById('searchBox').value.toLowerCase(),fc=document.getElementById('filterColor').value,fs=document.getElementById('filterServer').value;const f=all.filter(p=>{if(q&&!((p.exeId||'').toLowerCase().includes(q)||(p.server||'').toLowerCase().includes(q)))return false;if(fc&&p.winnerColor!==fc)return false;if(fs&&p.server!==fs)return false;return true;});const tb=document.getElementById('tableBody');if(!f.length){tb.innerHTML='<tr><td colspan="6" class="status-row">ไม่พบข้อมูล</td></tr>';return;}tb.innerHTML=f.map((p,i)=>'<tr><td style="color:#8b949e">'+(i+1)+'</td><td><strong>'+(p.exeId||'-')+'</strong></td><td><span class="server-tag">'+(p.server||'-')+'</span></td><td>'+badge(p.winnerColor,p.winnerLabel)+'</td><td>'+(p.reward||'-')+'</td><td class="time-cell">'+fmt(p.playedAtISO)+'</td></tr>').join('');}
+function exportCSV(){const q=document.getElementById('searchBox').value.toLowerCase(),fc=document.getElementById('filterColor').value,fs=document.getElementById('filterServer').value;const f=all.filter(p=>{if(q&&!((p.exeId||'').toLowerCase().includes(q)||(p.server||'').toLowerCase().includes(q)))return false;if(fc&&p.winnerColor!==fc)return false;if(fs&&p.server!==fs)return false;return true;});const h=['EXE ID','Server','ร่มที่ได้','ของรางวัล','เวลาที่เล่น'],rows=f.map(p=>[p.exeId||'',p.server||'',p.winnerLabel||p.winnerColor||'',p.reward||'',p.playedAtISO?new Date(p.playedAtISO).toLocaleString('th-TH'):'']);const csv=[h,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ge_umbrella_winners.csv';a.click();URL.revokeObjectURL(url);}
+loadData();
+</script>
+</body>
+</html>
