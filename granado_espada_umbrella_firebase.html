@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pick Your Umbrella — Granado Espada</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK v10 compat — Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
+:root {
+  --gold:        #d4a843;
+  --gold-light:  #f0cc7a;
+  --gold-dark:   #8c6619;
+  --cream:       #f5e9cf;
+  --parchment:   #e8d5a8;
+  --ink:         #1a1208;
+  --deep-navy:   #0d1a2e;
+  --midnight:    #060d18;
+  --teal:        #2a7a8c;
+  --teal-light:  #4ab8ce;
+  --blood:       #8b1a1a;
+  --shadow:      rgba(0,0,0,0.75);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: radial-gradient(ellipse at center, #0d1520 0%, #050a10 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: 'Cinzel', serif;
+}
+
+/* ═══════════════════════════════════════════
+   GAME WRAPPER
+═══════════════════════════════════════════ */
+#gameWrapper {
+  width: 430px;
+  max-width: 100vw;
+  height: 720px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+
+  /* Ornate double border */
+  border: 3px solid var(--gold);
+  outline: 1px solid var(--gold-dark);
+  box-shadow:
+    0 0 0 6px rgba(212,168,67,0.15),
+    0 0 60px rgba(212,168,67,0.2),
+    inset 0 0 80px rgba(0,0,0,0.6);
+}
+
+/* ═══════════════════════════════════════════
+   BACKGROUND LAYERS
+═══════════════════════════════════════════ */
+
+/* Sky gradient */
+.sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    #0a1e35 0%,
+    #1a3a5c 30%,
+    #2a5578 55%,
+    #3a6b7a 75%,
+    #4a7a6a 100%
+  );
+}
+
+/* Stars */
+.stars {
+  position: absolute;
+  inset: 0 0 40% 0;
+  background-image:
+    radial-gradient(1px 1px at 8% 12%, rgba(255,245,220,0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 8%, rgba(255,245,220,0.7) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 38% 18%, rgba(255,245,220,0.85) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 6%, rgba(255,245,220,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 68% 14%, rgba(255,245,220,0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 82% 9%, rgba(255,245,220,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 92% 20%, rgba(255,245,220,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 25%, rgba(255,245,220,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 47% 30%, rgba(255,245,220,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 22%, rgba(255,245,220,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 35%, rgba(255,245,220,0.4) 0%, transparent 100%);
+}
+
+/* Magic light orbs */
+.magic-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 200px 150px at 20% 35%, rgba(74,184,206,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 180px 120px at 80% 25%, rgba(212,168,67,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 160px 200px at 50% 55%, rgba(74,184,206,0.06) 0%, transparent 70%);
+  animation: magicPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes magicPulse {
+  0%   { opacity: 0.7; }
+  100% { opacity: 1.3; }
+}
+
+/* Gothic cathedral silhouette */
+.cathedral {
+  position: absolute;
+  bottom: 95px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 260px;
+  opacity: 0.35;
+}
+
+/* Cathedral built with CSS */
+.cathedral-body {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 140px;
+  background: linear-gradient(180deg, #1a2535 0%, #0d1520 100%);
+}
+
+.cathedral-tower-l,
+.cathedral-tower-r {
+  position: absolute;
+  bottom: 0;
+  width: 55px;
+  height: 200px;
+  background: linear-gradient(180deg, #1e2d45 0%, #0d1520 100%);
+}
+.cathedral-tower-l { left: 30px; }
+.cathedral-tower-r { right: 30px; }
+
+.cathedral-spire-l,
+.cathedral-spire-r {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 60px solid #1e2d45;
+}
+
+.cathedral-spire-center {
+  position: absolute;
+  bottom: 140px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 22px solid transparent;
+  border-right: 22px solid transparent;
+  border-bottom: 80px solid #162030;
+}
+
+/* Gothic arch windows on cathedral */
+.arch-window {
+  position: absolute;
+  width: 14px;
+  height: 24px;
+  background: rgba(74,184,206,0.25);
+  border-radius: 7px 7px 0 0;
+  box-shadow: 0 0 8px rgba(74,184,206,0.4);
+}
+
+/* Rain */
+.rain {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 8px,
+    rgba(180,220,255,0.12) 8px,
+    rgba(180,220,255,0.12) 9px
+  );
+  background-size: 3px 60px;
+  animation: rainFall 0.6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rainFall {
+  from { background-position: 0 0; }
+  to   { background-position: 0 60px; }
+}
+
+/* Cobblestone street */
+.ground {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 98px;
+  background:
+    linear-gradient(180deg, #3d3020 0%, #1e1508 100%);
+  border-top: 3px solid var(--gold-dark);
+}
+
+/* Cobblestone texture */
+.ground::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 22px,
+      rgba(0,0,0,0.35) 22px,
+      rgba(0,0,0,0.35) 24px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 14px,
+      rgba(0,0,0,0.25) 14px,
+      rgba(0,0,0,0.25) 16px
+    );
+  opacity: 0.7;
+}
+
+/* Ground gold trim line */
+.ground::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+}
+
+/* Gas lamp posts */
+.lamp {
+  position: absolute;
+  bottom: 95px;
+  width: 8px;
+  height: 120px;
+  background: linear-gradient(180deg, #8c6619 0%, #5a3c10 100%);
+  border-radius: 2px;
+}
+.lamp::before {
+  content: "";
+  position: absolute;
+  top: -22px;
+  left: -12px;
+  width: 32px;
+  height: 28px;
+  background: linear-gradient(180deg, #c9a040 0%, #7a5a20 100%);
+  border: 2px solid var(--gold-dark);
+  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+}
+.lamp::after {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: -8px;
+  width: 24px;
+  height: 20px;
+  background: rgba(255, 200, 80, 0.85);
+  box-shadow: 0 0 18px 10px rgba(255, 160, 40, 0.5), 0 0 40px 20px rgba(255, 140, 20, 0.2);
+  border-radius: 2px;
+}
+
+.lamp-left  { left: 28px; }
+.lamp-right { right: 28px; }
+
+/* Sparkle particles */
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold-light);
+  animation: sparkleFade var(--dur, 3s) ease-in-out var(--delay, 0s) infinite;
+  opacity: 0;
+}
+
+@keyframes sparkleFade {
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  30%  { opacity: 1; }
+  70%  { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-40px) scale(1.5); }
+}
+
+/* ═══════════════════════════════════════════
+   ORNATE CORNER DECORATIONS
+═══════════════════════════════════════════ */
+.corner {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  z-index: 25;
+  opacity: 0.85;
+}
+.corner svg { width: 100%; height: 100%; }
+.corner-tl { top: 4px;  left: 4px; }
+.corner-tr { top: 4px;  right: 4px;  transform: scaleX(-1); }
+.corner-bl { bottom: 4px; left: 4px;  transform: scaleY(-1); }
+.corner-br { bottom: 4px; right: 4px; transform: scale(-1,-1); }
+
+/* ═══════════════════════════════════════════
+   HUD
+═══════════════════════════════════════════ */
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 15;
+  color: var(--cream);
+}
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.panel {
+  background:
+    linear-gradient(180deg, rgba(20,12,4,0.88) 0%, rgba(10,6,2,0.92) 100%);
+  border: 1px solid var(--gold-dark);
+  border-radius: 3px;
+  padding: 7px 13px;
+  color: var(--gold-light);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow:
+    0 0 12px rgba(212,168,67,0.2),
+    inset 0 1px 0 rgba(240,204,122,0.15);
+  position: relative;
+}
+
+/* Panel corner ticks */
+.panel::before,
+.panel::after {
+  content: "◆";
+  position: absolute;
+  font-size: 7px;
+  color: var(--gold);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.panel::before { left: 4px; }
+.panel::after  { right: 4px; }
+
+/* Title panel center */
+.panel-title {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--gold-light);
+}
+
+#scorePanel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.scoreItem {
+  background: linear-gradient(180deg, rgba(20,12,4,0.88) 0%, rgba(10,6,2,0.92) 100%);
+  border: 1px solid var(--gold-dark);
+  border-radius: 3px;
+  padding: 6px 4px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 0 8px rgba(212,168,67,0.15);
+}
+
+.scoreItem .score-label {
+  font-size: 10px;
+  display: block;
+  opacity: 0.8;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+}
+
+.scoreItem .score-num {
+  font-size: 18px;
+  font-family: 'Cinzel', serif;
+  display: block;
+  text-shadow: 0 0 8px currentColor;
+}
+
+/* ═══════════════════════════════════════════
+   BASKET — Ornate Baroque Basket
+═══════════════════════════════════════════ */
+#basket {
+  position: absolute;
+  bottom: 68px;
+  width: 100px;
+  height: 60px;
+  left: 165px;
+  z-index: 8;
+  cursor: grab;
+  touch-action: none;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+}
+#basket:active { cursor: grabbing; }
+
+.basket-body {
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 44px;
+  background: linear-gradient(180deg, #c9902a 0%, #7a5018 50%, #4a2e0a 100%);
+  border-radius: 0 0 28px 28px;
+  border: 2px solid var(--gold-dark);
+  overflow: hidden;
+}
+
+/* Weave pattern on basket */
+.basket-body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg,
+      rgba(0,0,0,0.2) 0px, rgba(0,0,0,0.2) 3px,
+      transparent 3px, transparent 8px
+    ),
+    repeating-linear-gradient(-45deg,
+      rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 3px,
+      transparent 3px, transparent 8px
+    );
+}
+
+/* Gold trim on basket rim */
+.basket-body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-light), var(--gold-dark));
+}
+
+/* Basket brim */
+.basket-brim {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  height: 16px;
+  background: linear-gradient(180deg, #d4a843 0%, #8c6619 100%);
+  border-radius: 50%;
+  border: 2px solid var(--gold-dark);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.6),
+    inset 0 2px 4px rgba(255,255,255,0.15);
+}
+
+/* GE emblem on basket */
+.basket-emblem {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--gold-light);
+  font-size: 18px;
+  text-shadow: 0 0 8px rgba(212,168,67,0.8);
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════
+   UMBRELLA (SVG Baroque Parasol)
+═══════════════════════════════════════════ */
+.umbrella {
+  position: absolute;
+  width: 64px;
+  height: 88px;
+  z-index: 6;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7));
+}
+
+.umbrella svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Sparkle on catch */
+@keyframes catchFlash {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+.catch-flash {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-light);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: catchFlash 0.4s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════
+   START SCREEN
+═══════════════════════════════════════════ */
+#startScreen,
+#resultScreen {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-dark) transparent;
+
+  /* Parchment-ish overlay */
+  background:
+    linear-gradient(180deg, rgba(6,4,2,0.96) 0%, rgba(10,8,4,0.98) 100%);
+
+  /* Texture overlay */
+  background-image:
+    linear-gradient(180deg, rgba(6,4,2,0.96) 0%, rgba(10,8,4,0.98) 100%),
+    url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9902a' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+  color: var(--cream);
+  padding: 28px 22px 28px;
+  text-align: center;
+}
+
+#resultScreen { display: none; }
+
+/* Ornate divider line */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--gold);
+  font-size: 14px;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dark), var(--gold), var(--gold-dark), transparent);
+}
+
+/* Screen title */
+.screen-title {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: 18px;
+  color: var(--gold-light);
+  letter-spacing: 0.08em;
+  text-shadow:
+    0 0 20px rgba(212,168,67,0.6),
+    0 2px 4px rgba(0,0,0,0.8);
+  margin-bottom: 4px;
+}
+
+.screen-subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(240,204,122,0.7);
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+/* Description box — parchment style */
+.desc {
+  font-family: 'IM Fell English', serif;
+  font-size: 14.5px;
+  line-height: 1.9;
+  text-align: left;
+  background:
+    linear-gradient(180deg, rgba(212,168,67,0.06) 0%, rgba(212,168,67,0.03) 100%);
+  padding: 16px 18px;
+  border-radius: 2px;
+  border: 1px solid rgba(212,168,67,0.3);
+  border-top: 2px solid var(--gold-dark);
+  border-bottom: 2px solid var(--gold-dark);
+  color: #dbc998;
+  position: relative;
+}
+
+/* Illuminated capital style */
+.desc b {
+  color: var(--gold-light);
+  font-style: normal;
+}
+
+/* Input fields */
+.field-label {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-align: left;
+  display: block;
+  margin: 14px 0 5px;
+  text-transform: uppercase;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 2px;
+  border: 1px solid var(--gold-dark);
+  border-bottom: 2px solid var(--gold);
+  font-size: 15px;
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(180deg, rgba(30,18,6,0.9) 0%, rgba(20,12,4,0.95) 100%);
+  color: var(--cream);
+  letter-spacing: 0.05em;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--gold-light);
+  box-shadow: 0 0 12px rgba(212,168,67,0.3);
+}
+
+select option {
+  background: #1a1008;
+  color: var(--cream);
+}
+
+/* CTA Button */
+button {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--gold-dark);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #c9902a 0%, #8c6216 40%, #5a3c10 100%);
+  color: var(--cream);
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  box-shadow:
+    0 4px 16px rgba(140,98,22,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.2s;
+}
+
+button::before {
+  content: "✦";
+  margin-right: 10px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+button::after {
+  content: "✦";
+  margin-left: 10px;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+button:hover {
+  background: linear-gradient(180deg, #e0a830 0%, #9e7020 40%, #6a4814 100%);
+  box-shadow:
+    0 6px 24px rgba(212,168,67,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+#errorMsg {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: #e06060;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.small {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(240,204,122,0.55);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════
+   RESULT SCREEN
+═══════════════════════════════════════════ */
+.rewardBox {
+  margin-top: 4px;
+  padding: 18px;
+  border: 1px solid var(--gold-dark);
+  border-top: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+  background: rgba(212,168,67,0.05);
+  border-radius: 2px;
+  line-height: 1.8;
+  font-family: 'IM Fell English', serif;
+}
+
+.rewardHighlight {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 2px;
+  background:
+    linear-gradient(180deg, rgba(212,168,67,0.12) 0%, rgba(212,168,67,0.06) 100%);
+  border: 1px solid rgba(212,168,67,0.5);
+  box-shadow:
+    0 0 20px rgba(212,168,67,0.15),
+    inset 0 1px 0 rgba(212,168,67,0.2);
+}
+
+.rewardHighlight h2 {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: 13px;
+  color: var(--gold-light);
+  margin-bottom: 8px;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 12px rgba(212,168,67,0.5);
+}
+
+.rewardHighlight p {
+  font-size: 16px;
+  color: var(--cream);
+}
+
+.result-id {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  color: var(--gold-light);
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.result-server {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: rgba(240,204,122,0.7);
+  font-size: 13px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid rgba(212,168,67,0.25);
+  margin: 14px 0;
+}
+
+.score-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.score-summary-item {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(212,168,67,0.2);
+  border-radius: 2px;
+  padding: 8px 4px;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════
+   FIREBASE CONFIG MODAL
+═══════════════════════════════════════════ */
+#fbConfigModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.88);
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  overflow-y: auto;
+}
+#fbConfigModal.active { display: flex; }
+
+.fb-modal-box {
+  background: linear-gradient(180deg, #120d06 0%, #0a0804 100%);
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  padding: 28px 22px;
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+  box-shadow: 0 0 60px rgba(212,168,67,0.3);
+  color: var(--cream);
+  text-align: center;
+}
+
+.fb-modal-box .screen-title { font-size: 15px; margin-bottom: 6px; }
+
+.fb-field-group { text-align: left; }
+
+.fb-field-group label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+  margin-top: 12px;
+}
+
+.fb-field-group input {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-family: monospace;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--gold-dark);
+  border-bottom: 2px solid var(--gold);
+  color: #b8ffd8;
+  border-radius: 2px;
+  outline: none;
+  margin-top: 0;
+}
+
+.fb-hint {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(240,204,122,0.5);
+  line-height: 1.6;
+  margin-top: 14px;
+  border-top: 1px solid rgba(212,168,67,0.2);
+  padding-top: 12px;
+  text-align: left;
+}
+
+/* ═══════════════════════════════════════════
+   ADMIN DASHBOARD
+═══════════════════════════════════════════ */
+#adminPanel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: radial-gradient(ellipse at center, #0d1520 0%, #050a10 100%);
+  overflow-y: auto;
+  padding: 24px 18px 50px;
+  color: var(--cream);
+  font-family: 'Cinzel', serif;
+}
+#adminPanel.active { display: block; }
+
+.admin-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(212,168,67,0.3);
+  position: relative;
+}
+
+.admin-header .screen-title { font-size: 16px; }
+.admin-header .screen-subtitle { margin-top: 4px; }
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-stat-card {
+  background: linear-gradient(180deg, rgba(20,12,4,0.9) 0%, rgba(10,6,2,0.95) 100%);
+  border: 1px solid var(--gold-dark);
+  border-top: 2px solid var(--gold);
+  border-radius: 3px;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.admin-stat-card .stat-num {
+  font-family: 'Cinzel Decorative', cursive;
+  font-size: 26px;
+  color: var(--gold-light);
+  text-shadow: 0 0 12px rgba(212,168,67,0.5);
+  display: block;
+}
+
+.admin-stat-card .stat-label {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(240,204,122,0.6);
+  margin-top: 2px;
+  display: block;
+}
+
+.color-breakdown {
+  background: linear-gradient(180deg, rgba(20,12,4,0.9) 0%, rgba(10,6,2,0.95) 100%);
+  border: 1px solid var(--gold-dark);
+  border-top: 2px solid var(--gold);
+  border-radius: 3px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.breakdown-title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.color-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.color-bar-label {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 13px;
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.color-bar-track {
+  flex: 1;
+  height: 16px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.color-bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  min-width: 2px;
+  transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 5px;
+}
+
+.color-bar-fill span {
+  font-size: 10px;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+}
+
+.color-bar-pct {
+  font-size: 11px;
+  color: rgba(240,204,122,0.55);
+  width: 34px;
+  text-align: right;
+  flex-shrink: 0;
+  font-family: 'Cinzel', serif;
+}
+
+.admin-table-wrap {
+  background: linear-gradient(180deg, rgba(20,12,4,0.9) 0%, rgba(10,6,2,0.95) 100%);
+  border: 1px solid var(--gold-dark);
+  border-top: 2px solid var(--gold);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.admin-table-header {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid rgba(212,168,67,0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-table-header .tbl-title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.admin-table-header .entry-count {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(240,204,122,0.55);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  background: rgba(212,168,67,0.08);
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  font-weight: 600;
+  border-bottom: 1px solid rgba(212,168,67,0.15);
+}
+
+.admin-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(212,168,67,0.06);
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--cream);
+  vertical-align: middle;
+  word-break: break-all;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: rgba(212,168,67,0.04); }
+
+.badge-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+  border: 1px solid rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
+
+.reward-col {
+  font-size: 10px !important;
+  color: var(--gold-light) !important;
+  font-style: normal !important;
+  font-family: 'Cinzel', serif !important;
+}
+
+.ts-col {
+  font-size: 10px;
+  color: rgba(240,204,122,0.4);
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.admin-btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-btn-row button {
+  flex: 1;
+  margin-top: 0;
+  padding: 11px 6px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.admin-btn-row button::before,
+.admin-btn-row button::after { display: none; }
+
+.btn-secondary {
+  background: linear-gradient(180deg, rgba(30,18,6,0.9) 0%, rgba(20,12,4,0.95) 100%) !important;
+  border: 1px solid var(--gold-dark) !important;
+  color: var(--gold-light) !important;
+  box-shadow: none !important;
+}
+.btn-secondary:hover {
+  background: rgba(212,168,67,0.1) !important;
+  transform: none !important;
+}
+
+.admin-loading {
+  text-align: center;
+  padding: 30px;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: rgba(240,204,122,0.45);
+}
+
+#adminTrigger {
+  position: fixed;
+  bottom: 14px;
+  right: 14px;
+  width: 38px !important;
+  height: 38px;
+  background: linear-gradient(180deg, rgba(20,12,4,0.95), rgba(10,6,2,0.98));
+  border: 1px solid var(--gold-dark) !important;
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: 17px;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 0 12px rgba(212,168,67,0.2);
+  transition: box-shadow 0.2s;
+}
+#adminTrigger::before,
+#adminTrigger::after { display: none !important; }
+#adminTrigger:hover {
+  box-shadow: 0 0 20px rgba(212,168,67,0.45);
+  transform: none;
+}
+
+.save-status {
+  margin-top: 10px;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 2px;
+  text-align: center;
+}
+.save-status.saving  { color: rgba(240,204,122,0.7);  background: rgba(212,168,67,0.06);  border: 1px solid rgba(212,168,67,0.25); }
+.save-status.saved   { color: #60c855;  background: rgba(96,200,85,0.08);   border: 1px solid rgba(96,200,85,0.3); }
+.save-status.saveerr { color: #e05555;  background: rgba(224,85,85,0.08);  border: 1px solid rgba(224,85,85,0.3); }
+
+.no-firebase-note {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(240,204,122,0.45);
+  text-align: center;
+  padding: 10px;
+  border: 1px dashed rgba(212,168,67,0.2);
+  border-radius: 2px;
+  margin-top: 8px;
+}
+</style>
+</head>
+
+<body>
+<div id="gameWrapper">
+
+  <!-- Background layers -->
+  <div class="sky"></div>
+  <div class="stars"></div>
+  <div class="magic-glow"></div>
+
+  <!-- Cathedral silhouette -->
+  <div class="cathedral">
+    <div class="cathedral-tower-l">
+      <div class="cathedral-spire-l"></div>
+    </div>
+    <div class="cathedral-tower-r">
+      <div class="cathedral-spire-r"></div>
+    </div>
+    <div class="cathedral-body"></div>
+    <div class="cathedral-spire-center"></div>
+  </div>
+
+  <!-- Gas lamps -->
+  <div class="lamp lamp-left"></div>
+  <div class="lamp lamp-right"></div>
+
+  <!-- Rain effect -->
+  <div class="rain"></div>
+
+  <!-- Ground / cobblestone -->
+  <div class="ground"></div>
+
+  <!-- Ornate corner decorations -->
+  <div class="corner corner-tl">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 18 M4 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <path d="M4 4 Q4 14 14 14 Q24 14 24 24" stroke="#d4a843" stroke-width="1" fill="none" opacity="0.5"/>
+      <circle cx="4" cy="4" r="2.5" fill="#d4a843"/>
+      <path d="M8 4 L12 8 L8 12 L4 8 Z" fill="none" stroke="#d4a843" stroke-width="0.8" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="corner corner-tr">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 18 M4 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <path d="M4 4 Q4 14 14 14 Q24 14 24 24" stroke="#d4a843" stroke-width="1" fill="none" opacity="0.5"/>
+      <circle cx="4" cy="4" r="2.5" fill="#d4a843"/>
+      <path d="M8 4 L12 8 L8 12 L4 8 Z" fill="none" stroke="#d4a843" stroke-width="0.8" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="corner corner-bl">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 18 M4 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <path d="M4 4 Q4 14 14 14 Q24 14 24 24" stroke="#d4a843" stroke-width="1" fill="none" opacity="0.5"/>
+      <circle cx="4" cy="4" r="2.5" fill="#d4a843"/>
+      <path d="M8 4 L12 8 L8 12 L4 8 Z" fill="none" stroke="#d4a843" stroke-width="0.8" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="corner corner-br">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 18 M4 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <path d="M4 4 Q4 14 14 14 Q24 14 24 24" stroke="#d4a843" stroke-width="1" fill="none" opacity="0.5"/>
+      <circle cx="4" cy="4" r="2.5" fill="#d4a843"/>
+      <path d="M8 4 L12 8 L8 12 L4 8 Z" fill="none" stroke="#d4a843" stroke-width="0.8" opacity="0.7"/>
+    </svg>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-row">
+      <div class="panel">TIME ◈ <span id="time">30</span>s</div>
+      <div class="panel"><span class="panel-title">Pick Your Umbrella</span></div>
+    </div>
+    <div id="scorePanel">
+      <div class="scoreItem" style="color:#4da3ff;">
+        <span class="score-label">น้ำเงิน</span>
+        <span class="score-num" id="blueScore">0</span>
+      </div>
+      <div class="scoreItem" style="color:#e05555;">
+        <span class="score-label">แดง</span>
+        <span class="score-num" id="redScore">0</span>
+      </div>
+      <div class="scoreItem" style="color:#e8c340;">
+        <span class="score-label">เหลือง</span>
+        <span class="score-num" id="yellowScore">0</span>
+      </div>
+      <div class="scoreItem" style="color:#60c855;">
+        <span class="score-label">เขียว</span>
+        <span class="score-num" id="greenScore">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Basket -->
+  <div id="basket">
+    <div class="basket-brim"></div>
+    <div class="basket-body">
+      <div class="basket-emblem">✦</div>
+    </div>
+  </div>
+
+  <!-- Sparkle particles (decorative) -->
+  <div class="sparkle" style="left:15%;top:60%;--dur:4s;--delay:0s;"></div>
+  <div class="sparkle" style="left:80%;top:55%;--dur:3.5s;--delay:1s;background:#4ab8ce;"></div>
+  <div class="sparkle" style="left:45%;top:70%;--dur:5s;--delay:2s;"></div>
+  <div class="sparkle" style="left:65%;top:65%;--dur:3s;--delay:0.5s;background:#e8c340;"></div>
+  <div class="sparkle" style="left:25%;top:75%;--dur:4.5s;--delay:1.5s;"></div>
+
+  <!-- ═══════════════════ START SCREEN ═══════════════════ -->
+  <div id="startScreen">
+    <div class="screen-subtitle">— Granado Espada Event —</div>
+    <div class="screen-title">Pick Your Umbrella</div>
+    <div class="divider">✦ ✦ ✦</div>
+
+    <div class="desc">
+      ร่วมสนุกกับมินิเกมเก็บร่มสุดพิเศษ!<br><br>
+      บังคับตะกร้ารับร่มที่ตกลงมา ภายในเวลา <b>30 วินาที</b><br><br>
+      ร่มมีทั้งหมด 4 สี: <b>น้ำเงิน</b>, <b>แดง</b>, <b>เหลือง</b> และ <b>เขียว</b>
+      เมื่อจบเกม สีร่มที่เก็บได้มากที่สุดจะกำหนดรางวัลของท่าน<br><br>
+      ทีมงานจะส่งไอเทมรางวัลให้ภายใน <b>7 วันทำการ</b> หลังจบกิจกรรม<br><br>
+      <b>ผู้เล่น 1 EXE ID สามารถเล่นได้เพียง 1 ครั้งเท่านั้น</b>
+    </div>
+
+    <div class="divider">✦</div>
+
+    <label class="field-label" for="exeId">EXE ID</label>
+    <input id="exeId" placeholder="กรอก EXE ID ของท่าน" inputmode="latin" autocomplete="off" maxlength="32" oninput="sanitizeExeId(this)" />
+    <div class="small">*ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ A–Z และตัวเลข 0–9</div>
+
+    <label class="field-label" for="server">Server</label>
+    <select id="server">
+      <option value="">— เลือก Server —</option>
+      <option value="Leonardo">Leonardo</option>
+      <option value="Season Server">Season Server</option>
+    </select>
+
+    <button onclick="startGame()">เริ่มการผจญภัย</button>
+    <div id="errorMsg"></div>
+    <div class="small" style="margin-top:14px;">✦ ใช้เมาส์หรือนิ้วลากตะกร้าซ้าย–ขวา หรือปุ่มลูกศรบนแป้นพิมพ์</div>
+  </div>
+
+  <!-- ═══════════════════ RESULT SCREEN ═══════════════════ -->
+  <div id="resultScreen">
+    <div class="screen-subtitle">— สิ้นสุดการผจญภัย —</div>
+    <div class="screen-title">จบเกม</div>
+    <div class="divider">✦ ✦ ✦</div>
+    <div id="resultText" class="rewardBox"></div>
+    <button onclick="location.reload()">กลับสู่หน้าหลัก</button>
+  </div>
+
+</div><!-- /gameWrapper -->
+
+<!-- Admin trigger button -->
+<button id="adminTrigger" onclick="openAdmin()" title="Admin Dashboard">⚙</button>
+
+<!-- ═══════════════════════════════
+     FIREBASE CONFIG MODAL
+════════════════════════════════ -->
+<div id="fbConfigModal">
+  <div class="fb-modal-box">
+    <div class="screen-subtitle">— ระบบจัดการข้อมูล —</div>
+    <div class="screen-title">Firebase Setup</div>
+    <div class="divider" style="margin:12px 0;">✦</div>
+
+    <div class="fb-field-group">
+      <label>API Key</label>
+      <input id="fb_apiKey" placeholder="AIzaSy..." />
+      <label>Auth Domain</label>
+      <input id="fb_authDomain" placeholder="your-app.firebaseapp.com" />
+      <label>Database URL <span style="color:#e05555;">★ สำคัญ</span></label>
+      <input id="fb_databaseURL" placeholder="https://your-app-default-rtdb.asia-southeast1.firebasedatabase.app" />
+      <label>Project ID</label>
+      <input id="fb_projectId" placeholder="your-project-id" />
+      <label>App ID</label>
+      <input id="fb_appId" placeholder="1:123:web:abc..." />
+    </div>
+
+    <button onclick="saveFirebaseConfig()" style="margin-top:18px;">บันทึกและเชื่อมต่อ</button>
+    <button class="btn-secondary" onclick="closeFbModal()" style="margin-top:8px;">ยกเลิก</button>
+
+    <div class="fb-hint">
+      <b>วิธีสร้าง Firebase Project:</b><br>
+      1. ไปที่ <b>console.firebase.google.com</b> → Add project<br>
+      2. ตั้งชื่อ project → กด Continue จนเสร็จ<br>
+      3. ไปที่ <b>Realtime Database</b> → Create database<br>
+      &nbsp;&nbsp;&nbsp;เลือก <b>asia-southeast1</b> (ใกล้ไทยที่สุด)<br>
+      &nbsp;&nbsp;&nbsp;เลือก <b>Start in test mode</b> ก่อน (แก้ rules ทีหลัง)<br>
+      4. ไปที่ ⚙ Project Settings → Your apps → Add app (Web)</code><br>
+      5. Copy ค่าจาก <code>firebaseConfig</code> มากรอกในช่องด้านบน<br><br>
+      <b>Security Rules (แนะนำ):</b><br>
+      <code style="font-size:11px;color:#b8ffd8;">
+      { "rules": {<br>
+      &nbsp;&nbsp;"umbrella_results": {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;"$exeId": { ".write": "!data.exists()", ".read": true }<br>
+      &nbsp;&nbsp;}<br>
+      } }
+      </code><br>
+      → เขียนได้เฉพาะ key ที่ยังไม่มี (กัน overwrite)
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════
+     ADMIN DASHBOARD
+════════════════════════════════ -->
+<div id="adminPanel">
+  <div class="admin-header">
+    <div class="screen-subtitle">— บันทึกแห่งอาณาจักร —</div>
+    <div class="screen-title">Admin Dashboard</div>
+    <div class="divider" style="margin:10px 0 0;">✦ ✦ ✦</div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="admin-stats-grid">
+    <div class="admin-stat-card">
+      <span class="stat-num" id="adm-total">—</span>
+      <span class="stat-label">ผู้เล่นทั้งหมด</span>
+    </div>
+    <div class="admin-stat-card">
+      <span class="stat-num" id="adm-today">—</span>
+      <span class="stat-label">วันนี้</span>
+    </div>
+    <div class="admin-stat-card">
+      <span class="stat-num" id="adm-server-leo">—</span>
+      <span class="stat-label">Leonardo</span>
+    </div>
+    <div class="admin-stat-card">
+      <span class="stat-num" id="adm-server-sea">—</span>
+      <span class="stat-label">Season Server</span>
+    </div>
+  </div>
+
+  <!-- Color breakdown bars -->
+  <div class="color-breakdown">
+    <div class="breakdown-title">◈ สัดส่วนร่มที่ชนะ</div>
+    <div class="color-bar-row">
+      <span class="color-bar-label" style="color:#4da3ff;">น้ำเงิน</span>
+      <div class="color-bar-track">
+        <div class="color-bar-fill" id="bar-blue" style="width:0%;background:linear-gradient(90deg,#1e73ff,#4da3ff)">
+          <span id="bar-blue-n">0</span>
+        </div>
+      </div>
+      <span class="color-bar-pct" id="pct-blue">0%</span>
+    </div>
+    <div class="color-bar-row">
+      <span class="color-bar-label" style="color:#e05555;">แดง</span>
+      <div class="color-bar-track">
+        <div class="color-bar-fill" id="bar-red" style="width:0%;background:linear-gradient(90deg,#a02020,#e05555)">
+          <span id="bar-red-n">0</span>
+        </div>
+      </div>
+      <span class="color-bar-pct" id="pct-red">0%</span>
+    </div>
+    <div class="color-bar-row">
+      <span class="color-bar-label" style="color:#e8c340;">เหลือง</span>
+      <div class="color-bar-track">
+        <div class="color-bar-fill" id="bar-yellow" style="width:0%;background:linear-gradient(90deg,#a08010,#e8c340)">
+          <span id="bar-yellow-n">0</span>
+        </div>
+      </div>
+      <span class="color-bar-pct" id="pct-yellow">0%</span>
+    </div>
+    <div class="color-bar-row">
+      <span class="color-bar-label" style="color:#60c855;">เขียว</span>
+      <div class="color-bar-track">
+        <div class="color-bar-fill" id="bar-green" style="width:0%;background:linear-gradient(90deg,#287520,#60c855)">
+          <span id="bar-green-n">0</span>
+        </div>
+      </div>
+      <span class="color-bar-pct" id="pct-green">0%</span>
+    </div>
+  </div>
+
+  <!-- Player table -->
+  <div class="admin-table-wrap">
+    <div class="admin-table-header">
+      <span class="tbl-title">✦ รายชื่อผู้เล่น</span>
+      <span class="entry-count" id="adm-entry-count">โหลด...</span>
+    </div>
+    <div id="adm-table-body">
+      <div class="admin-loading">⌛ กำลังโหลดข้อมูลจาก Firebase...</div>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="admin-btn-row">
+    <button onclick="loadAdminData()">↻ รีเฟรช</button>
+    <button class="btn-secondary" onclick="exportCSV()">↓ Export CSV</button>
+    <button class="btn-secondary" onclick="closeAdmin()">✕ ปิด</button>
+  </div>
+
+  <div id="adm-no-firebase" class="no-firebase-note" style="display:none;">
+    ⚠ ยังไม่ได้ตั้งค่า Firebase — กดปุ่ม ⚙ แล้วกรอก Config ก่อนใช้งาน
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   FIREBASE  —  Realtime Database
+   ▼▼▼ กรอก Firebase Config ของคุณตรงนี้ ▼▼▼
+══════════════════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDqbGsBIkJzxqyLF3nNSLXCFRIze5la5qU",
+  authDomain:        "granado-espada-event.firebaseapp.com",
+  databaseURL:       "https://granado-espada-event-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "granado-espada-event",
+  storageBucket:     "granado-espada-event.firebasestorage.app",
+  messagingSenderId: "293451160037",
+  appId:             "1:293451160037:web:517d07067ae1e6affc370c"
+};
+/* ▲▲▲ คัดลอกค่าจาก Firebase Console → Project Settings → Your apps (Web) ▲▲▲ */
+
+const FB_CONFIG_KEY = "ge_firebase_config";
+let db = null;   // firebase.database() ref
+
+function getStoredConfig() {
+  try { return JSON.parse(localStorage.getItem(FB_CONFIG_KEY)); } catch { return null; }
+}
+
+function initFirebase(cfg) {
+  if (!cfg || !cfg.apiKey || !cfg.databaseURL) return false;
+  if (cfg.apiKey.startsWith("YOUR_")) {
+    console.warn("⚠ Firebase: กรุณากรอก Config จริงในตัวแปร FIREBASE_CONFIG ก่อน");
+    return false;
+  }
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    db = firebase.database();
+    console.log("✓ Firebase Realtime Database connected:", cfg.databaseURL);
+    return true;
+  } catch(e) { console.error("Firebase init failed:", e); return false; }
+}
+
+/* Auto-init on page load:
+   ใช้ FIREBASE_CONFIG ที่ hardcode ไว้เป็นหลัก
+   ถ้า admin เคยกรอก override ผ่าน modal → ใช้ localStorage แทน */
+(function() {
+  const stored = getStoredConfig();
+  const cfg    = (stored && stored.apiKey && !stored.apiKey.startsWith("YOUR_"))
+                 ? stored
+                 : FIREBASE_CONFIG;
+  initFirebase(cfg);
+})();
+
+/* ── Config Modal helpers ── */
+function openFbConfig() {
+  const cfg = getStoredConfig() || {};
+  ["apiKey","authDomain","databaseURL","projectId","appId"].forEach(k => {
+    const el = document.getElementById("fb_" + k);
+    if (el) el.value = cfg[k] || "";
+  });
+  document.getElementById("fbConfigModal").classList.add("active");
+}
+function closeFbModal() {
+  document.getElementById("fbConfigModal").classList.remove("active");
+}
+function saveFirebaseConfig() {
+  const keys = ["apiKey","authDomain","databaseURL","projectId","appId"];
+  const cfg = {};
+  keys.forEach(k => cfg[k] = document.getElementById("fb_" + k).value.trim());
+
+  if (!cfg.apiKey || !cfg.databaseURL) {
+    alert("กรุณากรอก API Key และ Database URL อย่างน้อย");
+    return;
+  }
+  localStorage.setItem(FB_CONFIG_KEY, JSON.stringify(cfg));
+
+  if (!firebase.apps.length) {
+    if (initFirebase(cfg)) { closeFbModal(); alert("✓ เชื่อมต่อ Firebase Realtime Database สำเร็จ!"); }
+    else alert("เกิดข้อผิดพลาด กรุณาตรวจสอบ Config อีกครั้ง");
+  } else {
+    db = firebase.database();
+    closeFbModal();
+    alert("✓ บันทึก Config แล้ว\n(หากเปลี่ยน Project ให้รีโหลดหน้าด้วย)");
+  }
+}
+
+/* ── Save result to Realtime Database ──
+   path:  umbrella_results / <exeId>
+   ใช้ set() เพื่อป้องกันซ้ำ — exeId เป็น key หลัก
+*/
+async function saveResultToDB(exeIdVal, serverVal, finalScores, winnerColor, reward) {
+  if (!db) return false;
+  try {
+    const colorNames = { blue:"น้ำเงิน", red:"แดง", yellow:"เหลือง", green:"เขียว" };
+    const ref = db.ref("umbrella_results/" + exeIdVal);
+    await ref.set({
+      exeId:       exeIdVal,
+      server:      serverVal,
+      scores:      finalScores,
+      winnerColor,
+      winnerLabel: colorNames[winnerColor] || winnerColor,
+      reward,
+      totalCaught: finalScores.blue + finalScores.red + finalScores.yellow + finalScores.green,
+      playedAt:    firebase.database.ServerValue.TIMESTAMP,
+      playedAtISO: new Date().toISOString()
+    });
+    return true;
+  } catch(e) { console.error("RTDB save error:", e); return false; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADMIN DASHBOARD
+══════════════════════════════════════════════════════════ */
+function openAdmin() {
+  document.getElementById("adminPanel").classList.add("active");
+  if (!db) {
+    document.getElementById("adm-no-firebase").style.display = "block";
+    document.getElementById("adm-table-body").innerHTML =
+      '<div class="admin-loading">ยังไม่ได้เชื่อมต่อ Firebase<br>กด ⚙ เพื่อตั้งค่า Config</div>';
+    return;
+  }
+  document.getElementById("adm-no-firebase").style.display = "none";
+  loadAdminData();
+}
+function closeAdmin() {
+  document.getElementById("adminPanel").classList.remove("active");
+}
+
+async function loadAdminData() {
+  if (!db) { openAdmin(); return; }
+  document.getElementById("adm-table-body").innerHTML =
+    '<div class="admin-loading">⌛ กำลังโหลดจาก Realtime Database...</div>';
+  try {
+    const snap = await db.ref("umbrella_results").orderByChild("playedAt").limitToLast(500).get();
+    if (!snap.exists()) {
+      renderAdminStats([]);
+      renderAdminTable([]);
+      return;
+    }
+    /* RTDB snapshot → array, เรียงล่าสุดก่อน */
+    const docs = [];
+    snap.forEach(child => docs.push(child.val()));
+    docs.reverse();          // newest first
+    renderAdminStats(docs);
+    renderAdminTable(docs);
+  } catch(e) {
+    console.error(e);
+    document.getElementById("adm-table-body").innerHTML =
+      `<div class="admin-loading" style="color:#e05555;">❌ โหลดข้อมูลไม่สำเร็จ<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderAdminStats(docs) {
+  const total    = docs.length;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  document.getElementById("adm-total").textContent      = total;
+  document.getElementById("adm-today").textContent      = docs.filter(d => (d.playedAtISO||"").startsWith(todayStr)).length;
+  document.getElementById("adm-server-leo").textContent = docs.filter(d => d.server === "Leonardo").length;
+  document.getElementById("adm-server-sea").textContent = docs.filter(d => d.server === "Season Server").length;
+
+  const counts = { blue:0, red:0, yellow:0, green:0 };
+  docs.forEach(d => { if (d.winnerColor in counts) counts[d.winnerColor]++; });
+  const maxC = Math.max(...Object.values(counts), 1);
+
+  ["blue","red","yellow","green"].forEach(c => {
+    const n   = counts[c];
+    const pct = total ? Math.round(n / total * 100) : 0;
+    document.getElementById("bar-"   + c).style.width = Math.round(n / maxC * 100) + "%";
+    document.getElementById("bar-"   + c + "-n").textContent = n;
+    document.getElementById("pct-"   + c).textContent = pct + "%";
+  });
+}
+
+function renderAdminTable(docs) {
+  document.getElementById("adm-entry-count").textContent = docs.length + " รายการ";
+  const dot  = { blue:"#4da3ff", red:"#e05555", yellow:"#e8c340", green:"#60c855" };
+  const name = { blue:"น้ำเงิน", red:"แดง", yellow:"เหลือง", green:"เขียว" };
+
+  if (!docs.length) {
+    document.getElementById("adm-table-body").innerHTML =
+      '<div class="admin-loading">ยังไม่มีข้อมูลผู้เล่น</div>';
+    return;
+  }
+
+  const rows = docs.map(d => {
+    const ts = (d.playedAtISO || "").slice(0,16).replace("T"," ") || "—";
+    const sc = d.scores || {};
+    return `<tr>
+      <td style="font-style:normal;font-family:'Cinzel',serif;font-size:11px;">${escHtml(d.exeId||"")}</td>
+      <td style="font-size:11px;">${escHtml(d.server||"")}</td>
+      <td><span class="badge-dot" style="background:${dot[d.winnerColor]||"#888"}"></span>${name[d.winnerColor]||d.winnerColor||"—"}</td>
+      <td class="reward-col">${escHtml(d.reward||"")}</td>
+      <td style="font-size:10px;color:rgba(240,204,122,0.55);white-space:nowrap;font-style:normal;">${ts}</td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("adm-table-body").innerHTML = `
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead><tr>
+          <th>EXE ID</th><th>Server</th><th>ร่มที่ได้</th><th>รางวัล</th><th>เวลา</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function exportCSV() {
+  if (!db) { alert("กรุณาเชื่อมต่อ Firebase ก่อน"); return; }
+  db.ref("umbrella_results").orderByChild("playedAt").get().then(snap => {
+    if (!snap.exists()) { alert("ไม่มีข้อมูล"); return; }
+    const docs = [];
+    snap.forEach(c => docs.push(c.val()));
+    docs.reverse();
+
+    const hdr  = "EXE ID,Server,ร่มที่ได้,รางวัล,Blue,Red,Yellow,Green,รวม,เวลา";
+    const rows = docs.map(d => {
+      const sc = d.scores || {};
+      return [d.exeId, d.server, d.winnerLabel, d.reward,
+              sc.blue||0, sc.red||0, sc.yellow||0, sc.green||0,
+              d.totalCaught||0, d.playedAtISO||""
+             ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(",");
+    });
+    const csv = "\uFEFF" + [hdr, ...rows].join("\n");
+    const a   = document.createElement("a");
+    a.href     = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8;"}));
+    a.download = "ge_umbrella_" + new Date().toISOString().slice(0,10) + ".csv";
+    a.click();
+  }).catch(e => alert("Export ไม่สำเร็จ: " + e.message));
+}
+
+function escHtml(t) {
+  return String(t).replace(/[&<>"']/g,
+    m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[m]);
+}
+</script>
+
+<script>
+const gameWrapper = document.getElementById("gameWrapper");
+const basket = document.getElementById("basket");
+
+const GAME_DURATION = 30;
+
+let exeId = "";
+let server = "";
+let timeLeft = GAME_DURATION;
+let gameRunning = false;
+let basketX = 165;
+let isDragging = false;
+
+let scores = { blue: 0, red: 0, yellow: 0, green: 0 };
+
+const umbrellaData = [
+  { color: "blue",   label: "ร่มสีน้ำเงิน", colorCode: "#1e73ff", reward: "Quiritatio Ampule (Event) x10" },
+  { color: "red",    label: "ร่มสีแดง",     colorCode: "#d93636", reward: "Food Summon Stone - Event x10" },
+  { color: "yellow", label: "ร่มสีเหลือง",  colorCode: "#e8b820", reward: "Holy - 2 (15 Days)" },
+  { color: "green",  label: "ร่มสีเขียว",   colorCode: "#4caf50", reward: "Upgrade Enchant Stabilizer - Event x20" }
+];
+
+let umbrellaBag = [];
+
+function getNextUmbrella() {
+  if (umbrellaBag.length === 0) {
+    umbrellaBag = [...umbrellaData];
+    for (let i = umbrellaBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [umbrellaBag[i], umbrellaBag[j]] = [umbrellaBag[j], umbrellaBag[i]];
+    }
+  }
+  return umbrellaBag.pop();
+}
+
+function sanitizeExeId(input) {
+  input.value = input.value.replace(/[^A-Za-z0-9]/g, "");
+}
+
+function startGame() {
+  exeId = document.getElementById("exeId").value.trim();
+  server = document.getElementById("server").value;
+  const errorMsg = document.getElementById("errorMsg");
+
+  if (!exeId || !server) {
+    errorMsg.textContent = "✦ กรุณากรอก EXE ID และเลือก Server";
+    return;
+  }
+  if (!/^[A-Za-z0-9]+$/.test(exeId)) {
+    errorMsg.textContent = "✦ EXE ID ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษและตัวเลขเท่านั้น";
+    return;
+  }
+
+  const playedIds = JSON.parse(localStorage.getItem("playedExeIds") || "[]");
+  if (playedIds.includes(exeId)) {
+    errorMsg.textContent = "✦ EXE ID นี้เคยเล่นกิจกรรมแล้ว ไม่สามารถเล่นซ้ำได้";
+    return;
+  }
+
+  document.getElementById("startScreen").style.display = "none";
+  gameRunning = true;
+  startTimer();
+  spawnLoop();
+}
+
+basket.addEventListener("pointerdown", (e) => {
+  if (!gameRunning) return;
+  isDragging = true;
+  basket.setPointerCapture(e.pointerId);
+});
+
+basket.addEventListener("pointermove", (e) => {
+  if (!gameRunning || !isDragging) return;
+  const wrapperRect = gameWrapper.getBoundingClientRect();
+  const basketWidth = basket.offsetWidth;
+  let newX = e.clientX - wrapperRect.left - basketWidth / 2;
+  if (newX < 0) newX = 0;
+  if (newX > wrapperRect.width - basketWidth) newX = wrapperRect.width - basketWidth;
+  basketX = newX;
+  basket.style.left = basketX + "px";
+});
+
+basket.addEventListener("pointerup", () => { isDragging = false; });
+basket.addEventListener("pointercancel", () => { isDragging = false; });
+
+document.addEventListener("keydown", (e) => {
+  if (!gameRunning) return;
+  if (e.key === "ArrowLeft") basketX -= 35;
+  if (e.key === "ArrowRight") basketX += 35;
+  if (basketX < 0) basketX = 0;
+  if (basketX > 430 - 100) basketX = 430 - 100;
+  basket.style.left = basketX + "px";
+});
+
+function spawnLoop() {
+  if (!gameRunning) return;
+  createUmbrella();
+  const nextSpawn = Math.max(300, 780 - ((GAME_DURATION - timeLeft) * 10));
+  setTimeout(spawnLoop, nextSpawn);
+}
+
+function createUmbrella() {
+  const item = getNextUmbrella();
+  const umbrella = document.createElement("div");
+  umbrella.className = "umbrella";
+  umbrella.dataset.color = item.color;
+  const c  = item.colorCode;
+  const cl = lighten(c);
+  const cd = darken(c);
+  umbrella.innerHTML = `
+    <svg viewBox="0 0 64 88" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="canopy-${item.color}" cx="45%" cy="30%" r="65%">
+          <stop offset="0%"   stop-color="${cl}" stop-opacity="1"/>
+          <stop offset="55%"  stop-color="${c}"  stop-opacity="1"/>
+          <stop offset="100%" stop-color="${cd}" stop-opacity="1"/>
+        </radialGradient>
+        <radialGradient id="sheen-${item.color}" cx="30%" cy="25%" r="50%">
+          <stop offset="0%"  stop-color="white" stop-opacity="0.30"/>
+          <stop offset="100%" stop-color="white" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Gold finial orb -->
+      <circle cx="32" cy="5" r="4" fill="url(#finial-g)" stroke="#8c6619" stroke-width="0.8"/>
+      <defs>
+        <radialGradient id="finial-g" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#f8e68a"/>
+          <stop offset="100%" stop-color="#8c6619"/>
+        </radialGradient>
+      </defs>
+      <!-- Finial glow -->
+      <circle cx="32" cy="5" r="5.5" fill="none" stroke="#d4a843" stroke-width="0.5" opacity="0.6"/>
+
+      <!-- Canopy main dome -->
+      <path d="M6,36 Q6,10 32,8 Q58,10 58,36 Z"
+            fill="url(#canopy-${item.color})" stroke="${cd}" stroke-width="1.2"/>
+
+      <!-- Canopy sheen overlay -->
+      <path d="M6,36 Q6,10 32,8 Q58,10 58,36 Z"
+            fill="url(#sheen-${item.color})"/>
+
+      <!-- Structural ribs (4 ribs) -->
+      <line x1="32" y1="8"  x2="6"  y2="36" stroke="${cd}" stroke-width="0.8" opacity="0.6"/>
+      <line x1="32" y1="8"  x2="19" y2="37" stroke="${cd}" stroke-width="0.8" opacity="0.6"/>
+      <line x1="32" y1="8"  x2="45" y2="37" stroke="${cd}" stroke-width="0.8" opacity="0.6"/>
+      <line x1="32" y1="8"  x2="58" y2="36" stroke="${cd}" stroke-width="0.8" opacity="0.6"/>
+
+      <!-- Baroque ruffle trim — scallop row -->
+      <path d="
+        M5,36
+        Q8,31 11,36
+        Q14,41 17,36
+        Q20,31 23,36
+        Q26,41 29,36
+        Q32,31 35,36
+        Q38,41 41,36
+        Q44,31 47,36
+        Q50,41 53,36
+        Q56,31 59,36
+      " fill="${c}" stroke="${cd}" stroke-width="1" opacity="0.9"/>
+
+      <!-- Gold lace trim line -->
+      <path d="
+        M5,36
+        Q8,31 11,36
+        Q14,41 17,36
+        Q20,31 23,36
+        Q26,41 29,36
+        Q32,31 35,36
+        Q38,41 41,36
+        Q44,31 47,36
+        Q50,41 53,36
+        Q56,31 59,36
+      " fill="none" stroke="#d4a843" stroke-width="0.9" opacity="0.7"/>
+
+      <!-- Shaft (ornate handle) -->
+      <rect x="30.5" y="36" width="3" height="36" rx="1.5"
+            fill="url(#shaft-g)" stroke="#5a3218" stroke-width="0.5"/>
+      <defs>
+        <linearGradient id="shaft-g" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#8c6619"/>
+          <stop offset="40%"  stop-color="#c9902a"/>
+          <stop offset="100%" stop-color="#5a3218"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Gold band mid-shaft -->
+      <rect x="29.5" y="50" width="5" height="4" rx="1"
+            fill="#d4a843" stroke="#8c6619" stroke-width="0.5"/>
+
+      <!-- Crook handle -->
+      <path d="M32,72 Q32,80 24,80 Q18,80 18,74"
+            fill="none" stroke="url(#shaft-g)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M32,72 Q32,80 24,80 Q18,80 18,74"
+            fill="none" stroke="#d4a843" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+
+      <!-- Handle tip cap -->
+      <circle cx="18" cy="74" r="2.2" fill="#d4a843" stroke="#8c6619" stroke-width="0.6"/>
+    </svg>
+  `;
+
+  let x = Math.random() * (gameWrapper.clientWidth - 60);
+  let y = -90;
+  let speed = 2.5 + Math.random() * 2.8;
+
+  umbrella.style.left = x + "px";
+  umbrella.style.top = y + "px";
+  gameWrapper.appendChild(umbrella);
+
+  const fall = setInterval(() => {
+    if (!gameRunning) {
+      clearInterval(fall);
+      umbrella.remove();
+      return;
+    }
+
+    y += speed;
+    umbrella.style.top = y + "px";
+
+    const umbrellaRect = umbrella.getBoundingClientRect();
+    const basketRect = basket.getBoundingClientRect();
+
+    const isCaught =
+      umbrellaRect.bottom >= basketRect.top &&
+      umbrellaRect.left < basketRect.right &&
+      umbrellaRect.right > basketRect.left &&
+      umbrellaRect.top < basketRect.bottom;
+
+    if (isCaught) {
+      scores[item.color]++;
+      updateScore();
+      // Flash effect
+      const flash = document.createElement("div");
+      flash.className = "catch-flash";
+      flash.style.borderColor = item.colorCode;
+      basket.appendChild(flash);
+      setTimeout(() => flash.remove(), 400);
+      umbrella.remove();
+      clearInterval(fall);
+    }
+
+    if (y > gameWrapper.clientHeight) {
+      umbrella.remove();
+      clearInterval(fall);
+    }
+  }, 16);
+}
+
+// Simple color helpers
+function lighten(hex) {
+  const r = Math.min(255, parseInt(hex.slice(1,3),16) + 60);
+  const g = Math.min(255, parseInt(hex.slice(3,5),16) + 60);
+  const b = Math.min(255, parseInt(hex.slice(5,7),16) + 60);
+  return `rgb(${r},${g},${b})`;
+}
+function darken(hex) {
+  const r = Math.max(0, parseInt(hex.slice(1,3),16) - 40);
+  const g = Math.max(0, parseInt(hex.slice(3,5),16) - 40);
+  const b = Math.max(0, parseInt(hex.slice(5,7),16) - 40);
+  return `rgb(${r},${g},${b})`;
+}
+
+function updateScore() {
+  document.getElementById("blueScore").textContent = scores.blue;
+  document.getElementById("redScore").textContent = scores.red;
+  document.getElementById("yellowScore").textContent = scores.yellow;
+  document.getElementById("greenScore").textContent = scores.green;
+}
+
+function startTimer() {
+  const timerEl = document.getElementById("time");
+  const timer = setInterval(() => {
+    if (!gameRunning) { clearInterval(timer); return; }
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+    if (timeLeft <= 10) timerEl.style.color = "#e06060";
+    if (timeLeft <= 0) { clearInterval(timer); endGame(); }
+  }, 1000);
+}
+
+async function endGame() {
+  gameRunning = false;
+
+  // Snapshot scores ทันทีก่อน state อื่นเปลี่ยน
+  const finalScores = { blue: scores.blue, red: scores.red, yellow: scores.yellow, green: scores.green };
+
+  const playedIds = JSON.parse(localStorage.getItem("playedExeIds") || "[]");
+  playedIds.push(exeId);
+  localStorage.setItem("playedExeIds", JSON.stringify(playedIds));
+
+  const winnerColor = getWinnerColor(finalScores);
+  const winnerData  = umbrellaData.find(item => item.color === winnerColor);
+  const colorNames  = { blue:"น้ำเงิน", red:"แดง", yellow:"เหลือง", green:"เขียว" };
+  const colorCodes  = { blue:"#4da3ff", red:"#e05555", yellow:"#e8c340", green:"#60c855" };
+
+  const summaryHTML = ["blue","red","yellow","green"].map(color => `
+    <div class="score-summary-item" style="color:${colorCodes[color]}">
+      <div style="font-size:9px;opacity:0.7;">${colorNames[color]}</div>
+      <div style="font-size:20px;">${finalScores[color]}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("resultText").innerHTML = `
+    <div class="result-id">EXE ID: ${escapeHtml(exeId)}</div>
+    <div class="result-server">Server: ${escapeHtml(server)}</div>
+    <hr>
+    <div class="score-summary">${summaryHTML}</div>
+    <div class="rewardHighlight">
+      <h2>◈ ร่มที่เก็บได้มากที่สุด: ${winnerData.label}</h2>
+      <h2>✦ ไอเทมรางวัลที่ได้รับ ✦</h2>
+      <p style="font-size:17px; color:#f0cc7a; font-family:'Cinzel',serif; font-weight:700;">${winnerData.reward}</p>
+    </div>
+    <p style="margin-top:14px; font-size:13px; color:rgba(240,204,122,0.6);">
+      ทีมงานจะส่งไอเทมให้ภายใน 7 วันทำการหลังจบกิจกรรม
+    </p>
+    <div id="saveStatus" class="save-status saving">⏳ กำลังบันทึกข้อมูล...</div>
+  `;
+
+  document.getElementById("resultScreen").style.display = "block";
+
+  // บันทึกไป Realtime Database
+  const saved = await saveResultToDB(exeId, server, finalScores, winnerColor, winnerData.reward);
+  const statusEl = document.getElementById("saveStatus");
+  if (statusEl) {
+    if (saved) {
+      statusEl.className = "save-status saved";
+      statusEl.textContent = "✓ บันทึกข้อมูลสำเร็จแล้ว";
+    } else {
+      statusEl.className = "save-status saveerr";
+      statusEl.textContent = db
+        ? "⚠ บันทึกไม่สำเร็จ — กรุณาแจ้งทีมงาน"
+        : "⚠ ยังไม่ได้เชื่อมต่อ Firebase (ข้อมูลจะไม่ถูกบันทึก)";
+    }
+  }
+
+  console.log({ exeId, server, finalScores, winnerColor, reward: winnerData.reward, saved });
+}
+
+function getWinnerColor(s) {
+  s = s || scores;
+  const max = Math.max(s.blue, s.red, s.yellow, s.green);
+  const winners = Object.keys(s).filter(color => s[color] === max);
+  return winners[Math.floor(Math.random() * winners.length)];
+}
+
+function escapeHtml(text) {
+  return text.replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[m]);
+}
+</script>
+
+</body>
+</html>
