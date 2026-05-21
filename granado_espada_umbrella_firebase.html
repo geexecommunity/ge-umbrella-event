@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Pick Your Umbrella — Granado Espada</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <!-- Firebase SDK v10 compat — Realtime Database -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -861,283 +861,6 @@ hr {
   text-align: left;
 }
 
-/* ═══════════════════════════════════════════
-   ADMIN DASHBOARD
-═══════════════════════════════════════════ */
-#adminPanel {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 150;
-  background: radial-gradient(ellipse at center, #0d1520 0%, #050a10 100%);
-  overflow-y: auto;
-  padding: 24px 18px 50px;
-  color: var(--cream);
-  font-family: 'Cinzel', serif;
-}
-#adminPanel.active { display: block; }
-
-.admin-header {
-  text-align: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(212,168,67,0.3);
-  position: relative;
-}
-
-.admin-header .screen-title { font-size: 16px; }
-.admin-header .screen-subtitle { margin-top: 4px; }
-
-.admin-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.admin-stat-card {
-  background: linear-gradient(180deg, rgba(20,12,4,0.9) 0%, rgba(10,6,2,0.95) 100%);
-  border: 1px solid var(--gold-dark);
-  border-top: 2px solid var(--gold);
-  border-radius: 3px;
-  padding: 14px 12px;
-  text-align: center;
-}
-
-.admin-stat-card .stat-num {
-  font-family: 'Cinzel Decorative', cursive;
-  font-size: 26px;
-  color: var(--gold-light);
-  text-shadow: 0 0 12px rgba(212,168,67,0.5);
-  display: block;
-}
-
-.admin-stat-card .stat-label {
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 12px;
-  color: rgba(240,204,122,0.6);
-  margin-top: 2px;
-  display: block;
-}
-
-.color-breakdown {
-  background: linear-gradient(180deg, rgba(20,12,4,0.9) 0%, rgba(10,6,2,0.95) 100%);
-  border: 1px solid var(--gold-dark);
-  border-top: 2px solid var(--gold);
-  border-radius: 3px;
-  padding: 16px;
-  margin-bottom: 14px;
-}
-
-.breakdown-title {
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-bottom: 14px;
-  text-align: center;
-}
-
-.color-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 9px;
-}
-
-.color-bar-label {
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 13px;
-  width: 52px;
-  flex-shrink: 0;
-}
-
-.color-bar-track {
-  flex: 1;
-  height: 16px;
-  background: rgba(0,0,0,0.4);
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.06);
-}
-
-.color-bar-fill {
-  height: 100%;
-  border-radius: 8px;
-  min-width: 2px;
-  transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 5px;
-}
-
-.color-bar-fill span {
-  font-size: 10px;
-  font-family: 'Cinzel', serif;
-  font-weight: 700;
-  color: rgba(255,255,255,0.9);
-}
-
-.color-bar-pct {
-  font-size: 11px;
-  color: rgba(240,204,122,0.55);
-  width: 34px;
-  text-align: right;
-  flex-shrink: 0;
-  font-family: 'Cinzel', serif;
-}
-
-.admin-table-wrap {
-  background: linear-gradient(180deg, rgba(20,12,4,0.9) 0%, rgba(10,6,2,0.95) 100%);
-  border: 1px solid var(--gold-dark);
-  border-top: 2px solid var(--gold);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 14px;
-}
-
-.admin-table-header {
-  padding: 10px 14px 8px;
-  border-bottom: 1px solid rgba(212,168,67,0.2);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.admin-table-header .tbl-title {
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--gold);
-  text-transform: uppercase;
-}
-
-.admin-table-header .entry-count {
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 12px;
-  color: rgba(240,204,122,0.55);
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-table th {
-  background: rgba(212,168,67,0.08);
-  padding: 7px 10px;
-  text-align: left;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--gold);
-  font-weight: 600;
-  border-bottom: 1px solid rgba(212,168,67,0.15);
-}
-
-.admin-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid rgba(212,168,67,0.06);
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  font-size: 12px;
-  color: var(--cream);
-  vertical-align: middle;
-  word-break: break-all;
-}
-
-.admin-table tr:last-child td { border-bottom: none; }
-.admin-table tr:hover td { background: rgba(212,168,67,0.04); }
-
-.badge-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  margin-right: 4px;
-  vertical-align: middle;
-  border: 1px solid rgba(255,255,255,0.25);
-  flex-shrink: 0;
-}
-
-.reward-col {
-  font-size: 10px !important;
-  color: var(--gold-light) !important;
-  font-style: normal !important;
-  font-family: 'Cinzel', serif !important;
-}
-
-.ts-col {
-  font-size: 10px;
-  color: rgba(240,204,122,0.4);
-  font-style: normal;
-  white-space: nowrap;
-}
-
-.admin-btn-row {
-  display: flex;
-  gap: 10px;
-}
-
-.admin-btn-row button {
-  flex: 1;
-  margin-top: 0;
-  padding: 11px 6px;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-}
-.admin-btn-row button::before,
-.admin-btn-row button::after { display: none; }
-
-.btn-secondary {
-  background: linear-gradient(180deg, rgba(30,18,6,0.9) 0%, rgba(20,12,4,0.95) 100%) !important;
-  border: 1px solid var(--gold-dark) !important;
-  color: var(--gold-light) !important;
-  box-shadow: none !important;
-}
-.btn-secondary:hover {
-  background: rgba(212,168,67,0.1) !important;
-  transform: none !important;
-}
-
-.admin-loading {
-  text-align: center;
-  padding: 30px;
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-  color: rgba(240,204,122,0.45);
-}
-
-#adminTrigger {
-  position: fixed;
-  bottom: 14px;
-  right: 14px;
-  width: 38px !important;
-  height: 38px;
-  background: linear-gradient(180deg, rgba(20,12,4,0.95), rgba(10,6,2,0.98));
-  border: 1px solid var(--gold-dark) !important;
-  border-radius: 50%;
-  color: var(--gold);
-  font-size: 17px;
-  cursor: pointer;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  box-shadow: 0 0 12px rgba(212,168,67,0.2);
-  transition: box-shadow 0.2s;
-}
-#adminTrigger::before,
-#adminTrigger::after { display: none !important; }
-#adminTrigger:hover {
-  box-shadow: 0 0 20px rgba(212,168,67,0.45);
-  transform: none;
-}
-
 .save-status {
   margin-top: 10px;
   font-family: 'IM Fell English', serif;
@@ -1162,10 +885,146 @@ hr {
   border-radius: 2px;
   margin-top: 8px;
 }
+
+/* ═══ GE LOGO BANNER ═══ */
+#ge-logo-banner {
+  text-align: center;
+  padding: 14px 0 10px;
+  margin-bottom: 8px;
+  width: 100%;
+  max-width: 560px;
+}
+.ge-logo-title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  color: #d4a843;
+  text-shadow: 0 0 30px rgba(212,168,67,0.6), 0 2px 4px rgba(0,0,0,0.8);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+.ge-logo-sub {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.55rem, 2vw, 0.75rem);
+  color: rgba(212,168,67,0.55);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ═══ BODY: THAI FONT OVERRIDE ═══ */
+.desc, .small, label, input, select, option,
+.result-server, .screen-subtitle, .save-status,
+#errorMsg, .field-label, .fb-hint, p {
+  font-family: 'Mitr', sans-serif !important;
+}
+
+/* ═══ SCORE NUMBERS — BIGGER & READABLE ═══ */
+.score-num {
+  font-family: 'Mitr', sans-serif !important;
+  font-size: clamp(1.3rem, 5vw, 1.8rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+.score-label {
+  font-family: 'Mitr', sans-serif !important;
+  font-size: clamp(0.7rem, 2.5vw, 0.85rem) !important;
+}
+.result-id {
+  font-size: clamp(0.9rem, 3.5vw, 1.1rem) !important;
+}
+
+/* ═══ RESPONSIVE GAME WRAPPER ═══ */
+body {
+  padding: 12px 8px;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+#gameWrapper {
+  width: min(560px, 100vw - 16px) !important;
+  height: min(780px, calc(100svh - 120px)) !important;
+  margin: 0 auto;
+}
+
+/* ═══ MOBILE: touch-friendly inputs & buttons ═══ */
+@media (max-width: 480px) {
+  #ge-logo-banner { padding: 10px 0 6px; }
+  input, select {
+    font-size: 16px !important; /* prevent iOS zoom */
+    padding: 10px 12px !important;
+  }
+  button {
+    font-size: 0.9rem !important;
+    padding: 12px 20px !important;
+    min-height: 48px;
+  }
+  .score-num {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* ═══ LARGE SCREENS ═══ */
+@media (min-width: 768px) {
+  body { align-items: center; flex-direction: column; padding: 20px; }
+  #gameWrapper {
+    width: 520px !important;
+    height: 760px !important;
+  }
+}
 </style>
+
+<!-- ═══ ANTI-CHEAT ═══ -->
+<script>
+(function(){
+  /* ── Disable right-click ── */
+  document.addEventListener('contextmenu', e => e.preventDefault());
+
+  /* ── Block DevTools keyboard shortcuts ── */
+  document.addEventListener('keydown', function(e) {
+    // F12
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+    // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+    if (e.ctrlKey && e.shiftKey && ['I','J','C','i','j','c'].includes(e.key)) { e.preventDefault(); return false; }
+    // Ctrl+U (view source)
+    if (e.ctrlKey && ['U','u'].includes(e.key)) { e.preventDefault(); return false; }
+  }, true);
+
+  /* ── DevTools size detection ── */
+  const THRESH = 160;
+  let devOpen = false;
+  function checkDev() {
+    const wOuter = window.outerWidth - window.innerWidth > THRESH;
+    const hOuter = window.outerHeight - window.innerHeight > THRESH;
+    if ((wOuter || hOuter) && !devOpen) {
+      devOpen = true;
+      document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#060d18;color:#d4a843;font-family:Cinzel,serif;text-align:center;padding:24px;"><div style="font-size:2rem;margin-bottom:16px;">⚠</div><div style="font-size:1.2rem;margin-bottom:8px;">ตรวจพบการเปิด Developer Tools</div><div style="font-size:0.9rem;color:#8b949e;">กรุณาปิด DevTools แล้ว refresh หน้าเว็บใหม่</div></div>';
+    }
+    if (!wOuter && !hOuter && devOpen) { devOpen = false; location.reload(); }
+  }
+  setInterval(checkDev, 1000);
+
+  /* ── Score integrity check: seal scores object ── */
+  window._gameIntegrity = (function() {
+    let _hash = 0;
+    return {
+      update: function(scores) {
+        _hash = Object.values(scores).reduce((a,b) => a + b, 0);
+      },
+      verify: function(scores) {
+        return Object.values(scores).reduce((a,b) => a + b, 0) === _hash;
+      }
+    };
+  })();
+})();
+</script>
 </head>
 
 <body>
+<!-- GE Logo Banner -->
+<div id="ge-logo-banner">
+  <div class="ge-logo-title">Granado Espada</div>
+  <div class="ge-logo-sub">www.granadoespada.in.th</div>
+</div>
 <div id="gameWrapper">
 
   <!-- Background layers -->
@@ -1222,7 +1081,7 @@ hr {
   </div>
   <div class="corner corner-br">
     <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 4 L4 18 M4 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <path d="M4 4 L4 18 M8 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
       <path d="M4 4 Q4 14 14 14 Q24 14 24 24" stroke="#d4a843" stroke-width="1" fill="none" opacity="0.5"/>
       <circle cx="4" cy="4" r="2.5" fill="#d4a843"/>
       <path d="M8 4 L12 8 L8 12 L4 8 Z" fill="none" stroke="#d4a843" stroke-width="0.8" opacity="0.7"/>
@@ -1300,7 +1159,7 @@ hr {
 
     <button onclick="startGame()">เริ่มการผจญภัย</button>
     <div id="errorMsg"></div>
-    <div class="small" style="margin-top:14px;">✦ ใช้เมาส์หรือนิ้วลากตะกร้าซ้าย–ขวา หรือปุ่มลูกศรบนแป้นพิมพ์</div>
+    <div class="small" style="margin-top:14px;">✦ ใช้เมาส์หรือนิ้วลากตะกร้าซ้าย–ขวาได้เลย</div>
   </div>
 
   <!-- ═══════════════════ RESULT SCREEN ═══════════════════ -->
@@ -1314,10 +1173,6 @@ hr {
 
 </div><!-- /gameWrapper -->
 
-<!-- Admin trigger button -->
-<button id="adminTrigger" onclick="openAdmin()" title="Admin Dashboard">⚙</button>
-
-<!-- ═══════════════════════════════
      FIREBASE CONFIG MODAL
 ════════════════════════════════ -->
 <div id="fbConfigModal">
@@ -1364,101 +1219,6 @@ hr {
   </div>
 </div>
 
-<!-- ═══════════════════════════════
-     ADMIN DASHBOARD
-════════════════════════════════ -->
-<div id="adminPanel">
-  <div class="admin-header">
-    <div class="screen-subtitle">— บันทึกแห่งอาณาจักร —</div>
-    <div class="screen-title">Admin Dashboard</div>
-    <div class="divider" style="margin:10px 0 0;">✦ ✦ ✦</div>
-  </div>
-
-  <!-- Summary cards -->
-  <div class="admin-stats-grid">
-    <div class="admin-stat-card">
-      <span class="stat-num" id="adm-total">—</span>
-      <span class="stat-label">ผู้เล่นทั้งหมด</span>
-    </div>
-    <div class="admin-stat-card">
-      <span class="stat-num" id="adm-today">—</span>
-      <span class="stat-label">วันนี้</span>
-    </div>
-    <div class="admin-stat-card">
-      <span class="stat-num" id="adm-server-leo">—</span>
-      <span class="stat-label">Leonardo</span>
-    </div>
-    <div class="admin-stat-card">
-      <span class="stat-num" id="adm-server-sea">—</span>
-      <span class="stat-label">Season Server</span>
-    </div>
-  </div>
-
-  <!-- Color breakdown bars -->
-  <div class="color-breakdown">
-    <div class="breakdown-title">◈ สัดส่วนร่มที่ชนะ</div>
-    <div class="color-bar-row">
-      <span class="color-bar-label" style="color:#4da3ff;">น้ำเงิน</span>
-      <div class="color-bar-track">
-        <div class="color-bar-fill" id="bar-blue" style="width:0%;background:linear-gradient(90deg,#1e73ff,#4da3ff)">
-          <span id="bar-blue-n">0</span>
-        </div>
-      </div>
-      <span class="color-bar-pct" id="pct-blue">0%</span>
-    </div>
-    <div class="color-bar-row">
-      <span class="color-bar-label" style="color:#e05555;">แดง</span>
-      <div class="color-bar-track">
-        <div class="color-bar-fill" id="bar-red" style="width:0%;background:linear-gradient(90deg,#a02020,#e05555)">
-          <span id="bar-red-n">0</span>
-        </div>
-      </div>
-      <span class="color-bar-pct" id="pct-red">0%</span>
-    </div>
-    <div class="color-bar-row">
-      <span class="color-bar-label" style="color:#e8c340;">เหลือง</span>
-      <div class="color-bar-track">
-        <div class="color-bar-fill" id="bar-yellow" style="width:0%;background:linear-gradient(90deg,#a08010,#e8c340)">
-          <span id="bar-yellow-n">0</span>
-        </div>
-      </div>
-      <span class="color-bar-pct" id="pct-yellow">0%</span>
-    </div>
-    <div class="color-bar-row">
-      <span class="color-bar-label" style="color:#60c855;">เขียว</span>
-      <div class="color-bar-track">
-        <div class="color-bar-fill" id="bar-green" style="width:0%;background:linear-gradient(90deg,#287520,#60c855)">
-          <span id="bar-green-n">0</span>
-        </div>
-      </div>
-      <span class="color-bar-pct" id="pct-green">0%</span>
-    </div>
-  </div>
-
-  <!-- Player table -->
-  <div class="admin-table-wrap">
-    <div class="admin-table-header">
-      <span class="tbl-title">✦ รายชื่อผู้เล่น</span>
-      <span class="entry-count" id="adm-entry-count">โหลด...</span>
-    </div>
-    <div id="adm-table-body">
-      <div class="admin-loading">⌛ กำลังโหลดข้อมูลจาก Firebase...</div>
-    </div>
-  </div>
-
-  <!-- Buttons -->
-  <div class="admin-btn-row">
-    <button onclick="loadAdminData()">↻ รีเฟรช</button>
-    <button class="btn-secondary" onclick="exportCSV()">↓ Export CSV</button>
-    <button class="btn-secondary" onclick="closeAdmin()">✕ ปิด</button>
-  </div>
-
-  <div id="adm-no-firebase" class="no-firebase-note" style="display:none;">
-    ⚠ ยังไม่ได้ตั้งค่า Firebase — กดปุ่ม ⚙ แล้วกรอก Config ก่อนใช้งาน
-  </div>
-</div>
-
-<script>
 /* ══════════════════════════════════════════════════════════
    FIREBASE  —  Realtime Database
    ▼▼▼ กรอก Firebase Config ของคุณตรงนี้ ▼▼▼
@@ -1563,134 +1323,6 @@ async function saveResultToDB(exeIdVal, serverVal, finalScores, winnerColor, rew
   } catch(e) { console.error("RTDB save error:", e); return false; }
 }
 
-/* ══════════════════════════════════════════════════════════
-   ADMIN DASHBOARD
-══════════════════════════════════════════════════════════ */
-function openAdmin() {
-  document.getElementById("adminPanel").classList.add("active");
-  if (!db) {
-    document.getElementById("adm-no-firebase").style.display = "block";
-    document.getElementById("adm-table-body").innerHTML =
-      '<div class="admin-loading">ยังไม่ได้เชื่อมต่อ Firebase<br>กด ⚙ เพื่อตั้งค่า Config</div>';
-    return;
-  }
-  document.getElementById("adm-no-firebase").style.display = "none";
-  loadAdminData();
-}
-function closeAdmin() {
-  document.getElementById("adminPanel").classList.remove("active");
-}
-
-async function loadAdminData() {
-  if (!db) { openAdmin(); return; }
-  document.getElementById("adm-table-body").innerHTML =
-    '<div class="admin-loading">⌛ กำลังโหลดจาก Realtime Database...</div>';
-  try {
-    const snap = await db.ref("umbrella_results").orderByChild("playedAt").limitToLast(500).get();
-    if (!snap.exists()) {
-      renderAdminStats([]);
-      renderAdminTable([]);
-      return;
-    }
-    /* RTDB snapshot → array, เรียงล่าสุดก่อน */
-    const docs = [];
-    snap.forEach(child => docs.push(child.val()));
-    docs.reverse();          // newest first
-    renderAdminStats(docs);
-    renderAdminTable(docs);
-  } catch(e) {
-    console.error(e);
-    document.getElementById("adm-table-body").innerHTML =
-      `<div class="admin-loading" style="color:#e05555;">❌ โหลดข้อมูลไม่สำเร็จ<br><small>${e.message}</small></div>`;
-  }
-}
-
-function renderAdminStats(docs) {
-  const total    = docs.length;
-  const todayStr = new Date().toISOString().slice(0, 10);
-  document.getElementById("adm-total").textContent      = total;
-  document.getElementById("adm-today").textContent      = docs.filter(d => (d.playedAtISO||"").startsWith(todayStr)).length;
-  document.getElementById("adm-server-leo").textContent = docs.filter(d => d.server === "Leonardo").length;
-  document.getElementById("adm-server-sea").textContent = docs.filter(d => d.server === "Season Server").length;
-
-  const counts = { blue:0, red:0, yellow:0, green:0 };
-  docs.forEach(d => { if (d.winnerColor in counts) counts[d.winnerColor]++; });
-  const maxC = Math.max(...Object.values(counts), 1);
-
-  ["blue","red","yellow","green"].forEach(c => {
-    const n   = counts[c];
-    const pct = total ? Math.round(n / total * 100) : 0;
-    document.getElementById("bar-"   + c).style.width = Math.round(n / maxC * 100) + "%";
-    document.getElementById("bar-"   + c + "-n").textContent = n;
-    document.getElementById("pct-"   + c).textContent = pct + "%";
-  });
-}
-
-function renderAdminTable(docs) {
-  document.getElementById("adm-entry-count").textContent = docs.length + " รายการ";
-  const dot  = { blue:"#4da3ff", red:"#e05555", yellow:"#e8c340", green:"#60c855" };
-  const name = { blue:"น้ำเงิน", red:"แดง", yellow:"เหลือง", green:"เขียว" };
-
-  if (!docs.length) {
-    document.getElementById("adm-table-body").innerHTML =
-      '<div class="admin-loading">ยังไม่มีข้อมูลผู้เล่น</div>';
-    return;
-  }
-
-  const rows = docs.map(d => {
-    const ts = (d.playedAtISO || "").slice(0,16).replace("T"," ") || "—";
-    const sc = d.scores || {};
-    return `<tr>
-      <td style="font-style:normal;font-family:'Cinzel',serif;font-size:11px;">${escHtml(d.exeId||"")}</td>
-      <td style="font-size:11px;">${escHtml(d.server||"")}</td>
-      <td><span class="badge-dot" style="background:${dot[d.winnerColor]||"#888"}"></span>${name[d.winnerColor]||d.winnerColor||"—"}</td>
-      <td class="reward-col">${escHtml(d.reward||"")}</td>
-      <td style="font-size:10px;color:rgba(240,204,122,0.55);white-space:nowrap;font-style:normal;">${ts}</td>
-    </tr>`;
-  }).join("");
-
-  document.getElementById("adm-table-body").innerHTML = `
-    <div style="overflow-x:auto;">
-      <table class="admin-table">
-        <thead><tr>
-          <th>EXE ID</th><th>Server</th><th>ร่มที่ได้</th><th>รางวัล</th><th>เวลา</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
-}
-
-function exportCSV() {
-  if (!db) { alert("กรุณาเชื่อมต่อ Firebase ก่อน"); return; }
-  db.ref("umbrella_results").orderByChild("playedAt").get().then(snap => {
-    if (!snap.exists()) { alert("ไม่มีข้อมูล"); return; }
-    const docs = [];
-    snap.forEach(c => docs.push(c.val()));
-    docs.reverse();
-
-    const hdr  = "EXE ID,Server,ร่มที่ได้,รางวัล,Blue,Red,Yellow,Green,รวม,เวลา";
-    const rows = docs.map(d => {
-      const sc = d.scores || {};
-      return [d.exeId, d.server, d.winnerLabel, d.reward,
-              sc.blue||0, sc.red||0, sc.yellow||0, sc.green||0,
-              d.totalCaught||0, d.playedAtISO||""
-             ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(",");
-    });
-    const csv = "\uFEFF" + [hdr, ...rows].join("\n");
-    const a   = document.createElement("a");
-    a.href     = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8;"}));
-    a.download = "ge_umbrella_" + new Date().toISOString().slice(0,10) + ".csv";
-    a.click();
-  }).catch(e => alert("Export ไม่สำเร็จ: " + e.message));
-}
-
-function escHtml(t) {
-  return String(t).replace(/[&<>"']/g,
-    m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[m]);
-}
-</script>
-
-<script>
 const gameWrapper = document.getElementById("gameWrapper");
 const basket = document.getElementById("basket");
 
@@ -1777,8 +1409,7 @@ basket.addEventListener("pointercancel", () => { isDragging = false; });
 
 document.addEventListener("keydown", (e) => {
   if (!gameRunning) return;
-  if (e.key === "ArrowLeft") basketX -= 35;
-  if (e.key === "ArrowRight") basketX += 35;
+  // Arrow keys removed — drag/touch only
   if (basketX < 0) basketX = 0;
   if (basketX > 430 - 100) basketX = 430 - 100;
   basket.style.left = basketX + "px";
