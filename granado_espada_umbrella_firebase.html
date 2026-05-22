@@ -370,39 +370,6 @@ body {
   color: var(--gold-light);
 }
 
-#scorePanel {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.scoreItem {
-  background: linear-gradient(180deg, rgba(20,12,4,0.88) 0%, rgba(10,6,2,0.92) 100%);
-  border: 1px solid var(--gold-dark);
-  border-radius: 3px;
-  padding: 6px 4px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  box-shadow: 0 0 8px rgba(212,168,67,0.15);
-}
-
-.scoreItem .score-label {
-  font-size: 10px;
-  display: block;
-  opacity: 0.8;
-  font-family: 'IM Fell English', serif;
-  font-style: italic;
-}
-
-.scoreItem .score-num {
-  font-size: 18px;
-  font-family: 'Cinzel', serif;
-  display: block;
-  text-shadow: 0 0 8px currentColor;
-}
 
 /* ═══════════════════════════════════════════
    BASKET — Ornate Baroque Basket
@@ -1081,7 +1048,7 @@ body {
   </div>
   <div class="corner corner-br">
     <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M4 4 L4 18 M8 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <path d="M4 4 L4 18 M4 4 L18 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
       <path d="M4 4 Q4 14 14 14 Q24 14 24 24" stroke="#d4a843" stroke-width="1" fill="none" opacity="0.5"/>
       <circle cx="4" cy="4" r="2.5" fill="#d4a843"/>
       <path d="M8 4 L12 8 L8 12 L4 8 Z" fill="none" stroke="#d4a843" stroke-width="0.8" opacity="0.7"/>
@@ -1093,24 +1060,6 @@ body {
     <div class="hud-row">
       <div class="panel">TIME ◈ <span id="time">30</span>s</div>
       <div class="panel"><span class="panel-title">Pick Your Umbrella</span></div>
-    </div>
-    <div id="scorePanel">
-      <div class="scoreItem" style="color:#4da3ff;">
-        <span class="score-label">น้ำเงิน</span>
-        <span class="score-num" id="blueScore">0</span>
-      </div>
-      <div class="scoreItem" style="color:#e05555;">
-        <span class="score-label">แดง</span>
-        <span class="score-num" id="redScore">0</span>
-      </div>
-      <div class="scoreItem" style="color:#e8c340;">
-        <span class="score-label">เหลือง</span>
-        <span class="score-num" id="yellowScore">0</span>
-      </div>
-      <div class="scoreItem" style="color:#60c855;">
-        <span class="score-label">เขียว</span>
-        <span class="score-num" id="greenScore">0</span>
-      </div>
     </div>
   </div>
 
@@ -1585,10 +1534,7 @@ function darken(hex) {
 }
 
 function updateScore() {
-  document.getElementById("blueScore").textContent = scores.blue;
-  document.getElementById("redScore").textContent = scores.red;
-  document.getElementById("yellowScore").textContent = scores.yellow;
-  document.getElementById("greenScore").textContent = scores.green;
+  // Scores tracked internally only (panel removed from UI)
 }
 
 function startTimer() {
