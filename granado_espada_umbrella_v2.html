@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Pick Your Umbrella — Granado Espada</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600&family=Mitr:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#d4a843;--gold-light:#f0cc7a;--gold-dark:#8c6619;
+  --cream:#f5e9cf;--midnight:#060d18;
+}
+body{
+  background:radial-gradient(ellipse at center,#0d1520 0%,#050a10 100%);
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  padding:12px 8px;font-family:'Cinzel',serif;
+  -webkit-user-select:none;user-select:none;
+}
+/* ── Logo ── */
+#logo{text-align:center;padding:10px 0 8px;width:100%;}
+#logo h1{font-family:'Cinzel Decorative',cursive;font-size:clamp(1.2rem,4.5vw,2rem);
+  color:var(--gold);text-shadow:0 0 24px rgba(212,168,67,.6);letter-spacing:.06em;}
+#logo p{font-family:'Cinzel',serif;font-size:clamp(.5rem,1.8vw,.7rem);
+  color:rgba(212,168,67,.5);letter-spacing:.22em;text-transform:uppercase;margin-top:3px;}
+
+/* ── Game wrapper ── */
+#gameWrapper{
+  width:min(480px,calc(100vw - 16px));
+  height:min(720px,calc(100svh - 100px));
+  position:relative;overflow:hidden;border-radius:4px;
+  border:2px solid var(--gold);
+  box-shadow:0 0 0 4px rgba(212,168,67,.12),0 0 48px rgba(212,168,67,.18),inset 0 0 60px rgba(0,0,0,.5);
+}
+@media(min-width:768px){
+  body{padding:20px;}
+  #gameWrapper{width:480px;height:720px;}
+}
+
+/* ── Sky & stars ── */
+.sky{position:absolute;inset:0;
+  background:linear-gradient(180deg,#0a1e35 0%,#1a3a5c 35%,#2a5578 60%,#3a6b7a 80%,#4a7a6a 100%);}
+.stars{position:absolute;inset:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%,#fff 0%,transparent 100%),
+    radial-gradient(1px 1px at 25% 8%,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 40% 22%,#fff 0%,transparent 100%),
+    radial-gradient(1px 1px at 60% 5%,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 75% 18%,#fff 0%,transparent 100%),
+    radial-gradient(1px 1px at 88% 10%,rgba(255,255,255,.6) 0%,transparent 100%),
+    radial-gradient(1px 1px at 15% 35%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 50% 30%,rgba(255,255,255,.4) 0%,transparent 100%);}
+.magic-glow{position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 30% at 50% 60%,rgba(42,122,140,.08) 0%,transparent 70%);}
+
+/* ── Cathedral silhouette ── */
+.cathedral{position:absolute;bottom:0;left:0;right:0;height:35%;pointer-events:none;}
+.cathedral::before{
+  content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:60%;height:100%;
+  background:linear-gradient(180deg,#0d1520 0%,#050a10 100%);
+  clip-path:polygon(20% 100%,20% 40%,25% 30%,30% 40%,35% 20%,40% 35%,50% 0%,60% 35%,65% 20%,70% 40%,75% 30%,80% 40%,80% 100%);
+}
+
+/* ── Ground ── */
+.ground{position:absolute;bottom:0;left:0;right:0;height:12%;
+  background:linear-gradient(180deg,#0d1a0d 0%,#050a05 100%);
+  border-top:1px solid rgba(212,168,67,.2);}
+
+/* ── Corner decorations ── */
+.corner{position:absolute;width:32px;height:32px;z-index:10;pointer-events:none;}
+.corner svg{width:100%;height:100%;}
+.corner-tl{top:6px;left:6px;}
+.corner-tr{top:6px;right:6px;transform:scaleX(-1);}
+.corner-bl{bottom:6px;left:6px;transform:scaleY(-1);}
+.corner-br{bottom:6px;right:6px;transform:scale(-1,-1);}
+
+/* ── HUD ── */
+#hud{position:absolute;top:0;left:0;right:0;z-index:20;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 14px;
+  background:linear-gradient(180deg,rgba(5,10,16,.85) 0%,transparent 100%);}
+.hud-timer{font-family:'Cinzel Decorative',cursive;font-size:clamp(.9rem,3vw,1.1rem);
+  color:var(--gold);text-shadow:0 0 10px rgba(212,168,67,.6);}
+.hud-title{font-family:'Cinzel',serif;font-size:clamp(.55rem,2vw,.7rem);
+  color:rgba(212,168,67,.6);letter-spacing:.1em;text-transform:uppercase;}
+
+/* ── Basket ── */
+#basket{
+  position:absolute;bottom:14%;
+  width:clamp(70px,18%,90px);height:clamp(36px,6%,48px);
+  cursor:grab;z-index:30;touch-action:none;
+}
+#basket:active{cursor:grabbing;}
+.basket-body{
+  width:100%;height:70%;
+  background:linear-gradient(180deg,#8c6619 0%,#5a3c10 100%);
+  border-radius:0 0 12px 12px;
+  border:1.5px solid var(--gold);border-top:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--gold);
+}
+.basket-brim{
+  width:110%;margin-left:-5%;height:30%;
+  background:linear-gradient(180deg,#c9902a 0%,#8c6619 100%);
+  border-radius:4px 4px 0 0;
+  border:1.5px solid var(--gold);
+}
+
+/* ── Umbrella ── */
+.umbrella{position:absolute;width:clamp(52px,14%,70px);z-index:25;pointer-events:none;}
+.umbrella svg{width:100%;height:auto;}
+
+/* ── Catch flash ── */
+.catch-flash{
+  position:absolute;inset:-4px;border-radius:8px;
+  border:3px solid #fff;animation:flash .4s ease-out forwards;pointer-events:none;
+}
+@keyframes flash{0%{opacity:.9}100%{opacity:0;transform:scale(1.2);}}
+
+/* ── Sparkles ── */
+.sparkle{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  background:var(--gold);pointer-events:none;
+  animation:twinkle var(--dur,4s) var(--delay,0s) infinite ease-in-out;
+}
+@keyframes twinkle{0%,100%{opacity:.1;transform:scale(.7)}50%{opacity:.9;transform:scale(1.2);}}
+
+/* ── Panels (start/result screens) ── */
+#startScreen,#resultScreen{
+  position:absolute;inset:0;z-index:50;overflow-y:auto;
+  background:linear-gradient(180deg,rgba(6,13,24,.97) 0%,rgba(10,18,36,.95) 100%);
+  padding:clamp(16px,4%,28px) clamp(14px,4%,22px);
+  display:flex;flex-direction:column;gap:0;
+}
+#resultScreen{display:none;}
+
+.screen-subtitle{
+  font-family:'Mitr',sans-serif;font-size:.75rem;
+  color:rgba(240,204,122,.65);letter-spacing:.04em;margin-bottom:2px;text-align:center;
+}
+.screen-title{
+  font-family:'Cinzel Decorative',cursive;font-size:clamp(1rem,4vw,1.3rem);
+  color:var(--gold-light);letter-spacing:.06em;
+  text-shadow:0 0 16px rgba(212,168,67,.5);text-align:center;margin-bottom:4px;
+}
+.divider{
+  display:flex;align-items:center;gap:10px;margin:12px 0;
+  color:var(--gold);font-size:12px;text-align:center;
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-dark),var(--gold),var(--gold-dark),transparent);
+}
+.desc{
+  font-family:'Mitr',sans-serif;font-size:.85rem;line-height:1.8;
+  background:rgba(212,168,67,.05);padding:12px 14px;border-radius:2px;
+  border:1px solid rgba(212,168,67,.25);border-top:2px solid var(--gold-dark);
+  color:#dbc998;margin-bottom:4px;
+}
+.field-label{
+  font-family:'Mitr',sans-serif;font-size:.75rem;letter-spacing:.08em;
+  color:var(--gold);display:block;margin:12px 0 4px;text-transform:uppercase;
+}
+input,select{
+  width:100%;padding:10px 12px;border-radius:2px;
+  border:1px solid var(--gold-dark);border-bottom:2px solid var(--gold);
+  font-size:15px;font-family:'Mitr',sans-serif;
+  background:linear-gradient(180deg,rgba(30,18,6,.9) 0%,rgba(20,12,4,.95) 100%);
+  color:var(--cream);letter-spacing:.04em;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+input:focus,select:focus{border-color:var(--gold-light);box-shadow:0 0 10px rgba(212,168,67,.25);}
+select option{background:#1a1008;color:var(--cream);}
+.field-note{
+  font-family:'Mitr',sans-serif;font-size:.7rem;
+  color:rgba(240,204,122,.5);margin-top:5px;line-height:1.5;
+}
+.btn{
+  margin-top:16px;width:100%;padding:13px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--gold-dark);
+  background:linear-gradient(180deg,#c9902a 0%,#8c6216 40%,#5a3c10 100%);
+  color:var(--cream);font-family:'Cinzel Decorative',cursive;
+  font-size:clamp(.8rem,2.5vw,.95rem);font-weight:700;letter-spacing:.1em;
+  text-shadow:0 1px 3px rgba(0,0,0,.7);
+  box-shadow:0 4px 14px rgba(140,98,22,.4),inset 0 1px 0 rgba(255,255,255,.18);
+  transition:all .2s;
+}
+.btn:hover{background:linear-gradient(180deg,#e0a830 0%,#9e7020 40%,#6a4814 100%);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+#errorMsg{
+  font-family:'Mitr',sans-serif;font-style:normal;
+  color:#e06060;margin-top:10px;font-size:.82rem;text-align:center;min-height:20px;
+}
+
+/* ── Result screen ── */
+.result-meta{font-family:'Mitr',sans-serif;font-size:.82rem;color:rgba(240,204,122,.75);}
+.result-id{font-family:'Cinzel',serif;font-size:.95rem;color:var(--gold-light);margin-bottom:3px;}
+hr{border:none;border-top:1px solid rgba(212,168,67,.2);margin:12px 0;}
+.score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0;}
+.score-cell{
+  background:rgba(0,0,0,.3);border:1px solid rgba(212,168,67,.2);border-radius:2px;
+  padding:6px 4px;text-align:center;font-family:'Cinzel',serif;
+}
+.score-cell .sc-label{font-size:.6rem;opacity:.7;font-family:'Mitr',sans-serif;}
+.score-cell .sc-num{font-size:1.3rem;font-family:'Mitr',sans-serif;font-weight:600;}
+.reward-box{
+  margin-top:12px;padding:14px;border-radius:2px;
+  background:linear-gradient(180deg,rgba(212,168,67,.1) 0%,rgba(212,168,67,.05) 100%);
+  border:1px solid rgba(212,168,67,.45);
+}
+.reward-box h2{
+  font-family:'Cinzel Decorative',cursive;font-size:.8rem;
+  color:var(--gold-light);margin-bottom:6px;letter-spacing:.05em;
+}
+.reward-name{
+  font-size:1rem;color:#f0cc7a;font-family:'Cinzel',serif;font-weight:700;margin-top:4px;
+}
+.save-status{
+  margin-top:10px;font-family:'Mitr',sans-serif;font-size:.78rem;
+  padding:6px 12px;border-radius:2px;text-align:center;
+}
+.saving{color:rgba(240,204,122,.7);background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.22);}
+.saved{color:#60c855;background:rgba(96,200,85,.08);border:1px solid rgba(96,200,85,.3);}
+.saveerr{color:#e05555;background:rgba(224,85,85,.08);border:1px solid rgba(224,85,85,.3);}
+
+/* ── Rain ── */
+.rain{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;
+  background:repeating-linear-gradient(
+    90deg,transparent 0px,transparent 3px,
+    rgba(200,220,255,.04) 3px,rgba(200,220,255,.04) 4px
+  );
+  animation:rain 1.2s linear infinite;
+}
+@keyframes rain{0%{background-position:0 0}100%{background-position:0 80px;}}
+</style>
+</head>
+<body>
+
+<!-- Logo -->
+<div id="logo">
+  <h1>Granado Espada</h1>
+  <p>www.granadoespada.in.th</p>
+</div>
+
+<!-- Game wrapper -->
+<div id="gameWrapper">
+
+  <!-- Background layers -->
+  <div class="sky"></div>
+  <div class="stars"></div>
+  <div class="magic-glow"></div>
+  <div class="rain"></div>
+  <div class="cathedral"></div>
+  <div class="ground"></div>
+
+  <!-- Corner decorations -->
+  <div class="corner corner-tl">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 16 M4 4 L16 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <circle cx="4" cy="4" r="2" fill="#d4a843"/>
+    </svg>
+  </div>
+  <div class="corner corner-tr">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 16 M4 4 L16 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <circle cx="4" cy="4" r="2" fill="#d4a843"/>
+    </svg>
+  </div>
+  <div class="corner corner-bl">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 16 M4 4 L16 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <circle cx="4" cy="4" r="2" fill="#d4a843"/>
+    </svg>
+  </div>
+  <div class="corner corner-br">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 4 L4 16 M4 4 L16 4" stroke="#d4a843" stroke-width="1.5" fill="none"/>
+      <circle cx="4" cy="4" r="2" fill="#d4a843"/>
+    </svg>
+  </div>
+
+  <!-- Sparkles -->
+  <div class="sparkle" style="left:15%;top:55%;--dur:4s;--delay:0s;"></div>
+  <div class="sparkle" style="left:80%;top:50%;--dur:3.5s;--delay:1s;background:#4ab8ce;"></div>
+  <div class="sparkle" style="left:45%;top:68%;--dur:5s;--delay:2s;"></div>
+  <div class="sparkle" style="left:65%;top:60%;--dur:3s;--delay:.5s;background:#e8c340;"></div>
+
+  <!-- HUD (hidden until game starts) -->
+  <div id="hud" style="display:none;">
+    <span class="hud-timer">⏱ <span id="timeEl">30</span>s</span>
+    <span class="hud-title">Pick Your Umbrella</span>
+  </div>
+
+  <!-- Basket -->
+  <div id="basket" style="display:none;">
+    <div class="basket-brim"></div>
+    <div class="basket-body">❧</div>
+  </div>
+
+  <!-- ══════ START SCREEN ══════ -->
+  <div id="startScreen">
+    <div class="screen-subtitle">— Granado Espada Event —</div>
+    <div class="screen-title">Pick Your Umbrella</div>
+    <div class="divider">❧ ✦ ❧</div>
+
+    <div class="desc">
+      รีบคว้าร่มก่อนที่มันจะตกลงพื้น!<br><br>
+      เล่นได้ <strong>30 วินาที</strong> — จับร่มสีที่มีมากที่สุดเพื่อรับรางวัล<br><br>
+      4 สีได้แก่: <strong>น้ำเงิน</strong>, <strong>แดง</strong>, <strong>เหลือง</strong> และ <strong>เขียว</strong><br>
+      ลากตะกร้าซ้าย-ขวาเพื่อรับร่ม<br><br>
+      <strong>1 EXE ID รับรางวัลได้เพียง 1 รางวัลเท่านั้น</strong>
+    </div>
+
+    <div class="divider">❧</div>
+
+    <label class="field-label" for="exeId">EXE ID</label>
+    <input id="exeId" type="text" placeholder="กรอก EXE ID ของคุณ" inputmode="latin" autocomplete="off" maxlength="32"/>
+    <div class="field-note">* ใช้ได้เฉพาะ A–Z, a–z, 0–9</div>
+
+    <label class="field-label" for="server">Server</label>
+    <select id="server">
+      <option value="">— เลือก Server —</option>
+      <option value="Leonardo">Leonardo</option>
+      <option value="Season Server">Season Server</option>
+    </select>
+
+    <button class="btn" id="startBtn">▶ เริ่มเกม</button>
+    <div id="errorMsg"></div>
+    <div class="field-note" style="margin-top:12px;text-align:center;">
+      ❧ กดค้างแล้วลากตะกร้าเพื่อรับร่ม — ไม่มีปุ่มลูกศร
+    </div>
+  </div>
+
+  <!-- ══════ RESULT SCREEN ══════ -->
+  <div id="resultScreen">
+    <div class="screen-subtitle">— ผลการแข่งขัน —</div>
+    <div class="screen-title">ผลลัพธ์</div>
+    <div class="divider">❧ ✦ ❧</div>
+    <div id="resultContent"></div>
+    <button class="btn" id="replayBtn" style="margin-top:14px;">↺ เล่นใหม่</button>
+  </div>
+
+</div><!-- /gameWrapper -->
+
+<script>
+(function() {
+  "use strict";
+
+  /* ── Firebase ── */
+  var FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyDqbGsBIkJzxqyLF3nNSLXCFRIze5la5qU",
+    authDomain:        "granado-espada-event.firebaseapp.com",
+    databaseURL:       "https://granado-espada-event-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:         "granado-espada-event",
+    storageBucket:     "granado-espada-event.firebasestorage.app",
+    messagingSenderId: "293451160037",
+    appId:             "1:293451160037:web:517d07067ae1e6affc370c"
+  };
+
+  var db = null;
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    console.log("Firebase connected:", FIREBASE_CONFIG.databaseURL);
+  } catch(e) {
+    console.error("Firebase init failed:", e);
+  }
+
+  /* ── Game data ── */
+  var UMBRELLAS = [
+    { color:"blue",   label:"น้ำเงิน",  code:"#1e73ff", reward:"Quiritatiom Ampule (Event) x10" },
+    { color:"red",    label:"แดง",      code:"#d93636", reward:"Food Summon Stone - Event x10" },
+    { color:"yellow", label:"เหลือง",   code:"#e8b820", reward:"Holy - 2 (15 Days)" },
+    { color:"green",  label:"เขียว",    code:"#4caf50", reward:"Upgrade Enchant Stabilizer - Event x20" }
+  ];
+  var GAME_DURATION = 30;
+
+  /* ── State ── */
+  var exeId = '', server = '';
+  var timeLeft = GAME_DURATION, gameRunning = false;
+  var basketX = 165, isDragging = false;
+  var scores = { blue:0, red:0, yellow:0, green:0 };
+  var umbrellaPool = [];
+  var svgCounter = 0; // unique ID counter — แก้ปัญหา gradient ID ชน
+
+  /* ── DOM refs ── */
+  var startScreen   = document.getElementById('startScreen');
+  var resultScreen  = document.getElementById('resultScreen');
+  var resultContent = document.getElementById('resultContent');
+  var hud           = document.getElementById('hud');
+  var timeEl        = document.getElementById('timeEl');
+  var basket        = document.getElementById('basket');
+  var gameWrapper   = document.getElementById('gameWrapper');
+  var exeInput      = document.getElementById('exeId');
+  var serverSel     = document.getElementById('server');
+  var errorMsg      = document.getElementById('errorMsg');
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('replayBtn').addEventListener('click', function(){ location.reload(); });
+
+  /* ── Sanitize EXE ID ── */
+  exeInput.addEventListener('input', function(){
+    this.value = this.value.replace(/[^A-Za-z0-9]/g, '');
+  });
+
+  /* ── Start game ── */
+  function startGame() {
+    exeId  = exeInput.value.trim();
+    server = serverSel.value;
+
+    if (!exeId || !server) {
+      errorMsg.textContent = '❧ กรุณากรอก EXE ID และเลือก Server';
+      return;
+    }
+    if (!/^[A-Za-z0-9]+$/.test(exeId)) {
+      errorMsg.textContent = '❧ EXE ID ใช้ได้เฉพาะ A–Z, a–z, 0–9';
+      return;
+    }
+
+    var played = JSON.parse(localStorage.getItem('playedExeIds') || '[]');
+    if (played.indexOf(exeId) !== -1) {
+      errorMsg.textContent = '❧ EXE ID นี้เคยเล่นไปแล้ว ไม่สามารถเล่นซ้ำได้';
+      return;
+    }
+
+    startScreen.style.display = 'none';
+    hud.style.display = 'flex';
+    basket.style.display = 'block';
+    basket.style.left = basketX + 'px';
+
+    gameRunning = true;
+    scores = { blue:0, red:0, yellow:0, green:0 };
+    startTimer();
+    spawnLoop();
+  }
+
+  /* ── Timer ── */
+  function startTimer() {
+    var t = setInterval(function(){
+      if (!gameRunning) { clearInterval(t); return; }
+      timeLeft--;
+      timeEl.textContent = timeLeft;
+      if (timeLeft <= 10) timeEl.style.color = '#e06060';
+      if (timeLeft <= 0)  { clearInterval(t); endGame(); }
+    }, 1000);
+  }
+
+  /* ── Umbrella bag (shuffle) ── */
+  function getNextUmbrella() {
+    if (umbrellaPool.length === 0) {
+      umbrellaPool = UMBRELLAS.slice();
+      for (var i = umbrellaPool.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = umbrellaPool[i]; umbrellaPool[i] = umbrellaPool[j]; umbrellaPool[j] = tmp;
+      }
+    }
+    return umbrellaPool.pop();
+  }
+
+  /* ── Spawn loop ── */
+  function spawnLoop() {
+    if (!gameRunning) return;
+    createUmbrella();
+    var delay = Math.max(350, 900 - (GAME_DURATION - timeLeft) * 15);
+    setTimeout(spawnLoop, delay);
+  }
+
+  /* ── Create umbrella ── */
+  function createUmbrella() {
+    var item = getNextUmbrella();
+    var el = document.createElement('div');
+    el.className = 'umbrella';
+    el.dataset.color = item.color;
+
+    var c  = item.code;
+    var cl = lighten(c);
+    var cd = darken(c);
+
+    // ใช้ svgCounter เพื่อให้ gradient id ไม่ซ้ำกันระหว่างร่มหลายลูก
+    svgCounter++;
+    var uid = item.color + '-' + svgCounter;
+
+    el.innerHTML = buildUmbrellaSVG(c, cl, cd, uid);
+
+    var maxX = gameWrapper.clientWidth - 64;
+    var x = Math.random() * maxX;
+    var y = -80;
+    var speed = 2.2 + Math.random() * 2.5;
+
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    gameWrapper.appendChild(el);
+
+    var fall = setInterval(function(){
+      if (!gameRunning) { clearInterval(fall); el.remove(); return; }
+      y += speed;
+      el.style.top = y + 'px';
+
+      var ur = el.getBoundingClientRect();
+      var br = basket.getBoundingClientRect();
+
+      var caught = ur.bottom >= br.top && ur.left < br.right && ur.right > br.left && ur.top < br.bottom;
+      if (caught) {
+        scores[item.color]++;
+        var flash = document.createElement('div');
+        flash.className = 'catch-flash';
+        flash.style.borderColor = item.code;
+        basket.appendChild(flash);
+        setTimeout(function(){ flash.remove(); }, 400);
+        el.remove();
+        clearInterval(fall);
+        return;
+      }
+      if (y > gameWrapper.clientHeight + 20) { el.remove(); clearInterval(fall); }
+    }, 16);
+  }
+
+  /* ── Basket drag ── */
+  basket.addEventListener('pointerdown', function(e){
+    if (!gameRunning) return;
+    isDragging = true;
+    basket.setPointerCapture(e.pointerId);
+  });
+  basket.addEventListener('pointermove', function(e){
+    if (!gameRunning || !isDragging) return;
+    var wr = gameWrapper.getBoundingClientRect();
+    var bw = basket.offsetWidth;
+    var nx = e.clientX - wr.left - bw / 2;
+    if (nx < 0) nx = 0;
+    if (nx > wr.width - bw) nx = wr.width - bw;
+    basketX = nx;
+    basket.style.left = basketX + 'px';
+  });
+  basket.addEventListener('pointerup',     function(){ isDragging = false; });
+  basket.addEventListener('pointercancel', function(){ isDragging = false; });
+
+  /* ── End game ── */
+  function endGame() {
+    gameRunning = false;
+    var finalScores = { blue: scores.blue, red: scores.red, yellow: scores.yellow, green: scores.green };
+
+    var played = JSON.parse(localStorage.getItem('playedExeIds') || '[]');
+    played.push(exeId);
+    localStorage.setItem('playedExeIds', JSON.stringify(played));
+
+    var winnerColor = getWinner(finalScores);
+    var winnerItem  = null;
+    for (var i = 0; i < UMBRELLAS.length; i++) {
+      if (UMBRELLAS[i].color === winnerColor) { winnerItem = UMBRELLAS[i]; break; }
+    }
+
+    var colorNames  = { blue:'น้ำเงิน', red:'แดง', yellow:'เหลือง', green:'เขียว' };
+    var colorCodesR = { blue:'#4da3ff', red:'#e05555', yellow:'#e8c340', green:'#60c855' };
+
+    var scoreHTML = ['blue','red','yellow','green'].map(function(col){
+      return '<div class="score-cell" style="color:' + colorCodesR[col] + '">' +
+             '<div class="sc-label">' + colorNames[col] + '</div>' +
+             '<div class="sc-num">' + finalScores[col] + '</div>' +
+             '</div>';
+    }).join('');
+
+    resultContent.innerHTML =
+      '<div class="result-id">EXE ID: ' + esc(exeId) + '</div>' +
+      '<div class="result-meta">Server: ' + esc(server) + '</div>' +
+      '<hr>' +
+      '<div class="score-grid">' + scoreHTML + '</div>' +
+      '<div class="reward-box">' +
+        '<h2>⚑ ร่มที่เก็บได้มากที่สุด: ' + winnerItem.label + '</h2>' +
+        '<h2>✦ ไอเทมรางวัลที่ได้รับ ✦</h2>' +
+        '<div class="reward-name">' + esc(winnerItem.reward) + '</div>' +
+      '</div>' +
+      '<p style="margin-top:12px;font-family:Mitr,sans-serif;font-size:.75rem;color:rgba(240,204,122,.55);">' +
+        'ทีมงานจะส่งไอเทมให้ภายใน 7 วันทำการหลังจบกิจกรรม' +
+      '</p>' +
+      '<div id="saveStatus" class="save-status saving">⏳ กำลังบันทึกข้อมูล...</div>';
+
+    hud.style.display    = 'none';
+    basket.style.display = 'none';
+    resultScreen.style.display = 'flex';
+
+    saveResult(exeId, server, finalScores, winnerColor, winnerItem.reward);
+  }
+
+  /* ── Save to Firebase ── */
+  function saveResult(eid, srv, fs, wc, reward) {
+    var statusEl = document.getElementById('saveStatus');
+    if (!db) {
+      if (statusEl) { statusEl.className='save-status saveerr'; statusEl.textContent='⚠ ไม่ได้เชื่อมต่อ Firebase'; }
+      return;
+    }
+    var colorNames = { blue:'น้ำเงิน', red:'แดง', yellow:'เหลือง', green:'เขียว' };
+    var ref = db.ref('umbrella_results/' + eid);
+    ref.set({
+      exeId:       eid,
+      server:      srv,
+      scores:      fs,
+      winnerColor: wc,
+      winnerLabel: colorNames[wc] || wc,
+      reward:      reward,
+      totalCaught: fs.blue + fs.red + fs.yellow + fs.green,
+      playedAt:    firebase.database.ServerValue.TIMESTAMP,
+      playedAtISO: new Date().toISOString()
+    }).then(function(){
+      if (statusEl) { statusEl.className='save-status saved'; statusEl.textContent='✓ บันทึกข้อมูลเรียบร้อยแล้ว'; }
+    }).catch(function(e){
+      console.error('RTDB save error:', e);
+      if (statusEl) { statusEl.className='save-status saveerr'; statusEl.textContent='⚠ บันทึกข้อมูลไม่สำเร็จ — ' + e.message; }
+    });
+  }
+
+  /* ── Helpers ── */
+  function getWinner(s) {
+    var max = Math.max(s.blue, s.red, s.yellow, s.green);
+    var winners = ['blue','red','yellow','green'].filter(function(c){ return s[c] === max; });
+    return winners[Math.floor(Math.random() * winners.length)];
+  }
+
+  function esc(t) {
+    return String(t).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m];
+    });
+  }
+
+  function lighten(hex) {
+    var r = Math.min(255, parseInt(hex.slice(1,3),16) + 60);
+    var g = Math.min(255, parseInt(hex.slice(3,5),16) + 60);
+    var b = Math.min(255, parseInt(hex.slice(5,7),16) + 60);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+  function darken(hex) {
+    var r = Math.max(0, parseInt(hex.slice(1,3),16) - 40);
+    var g = Math.max(0, parseInt(hex.slice(3,5),16) - 40);
+    var b = Math.max(0, parseInt(hex.slice(5,7),16) - 40);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  /* ── Build umbrella SVG — gradient IDs ต้อง unique ทุกตัว ── */
+  function buildUmbrellaSVG(c, cl, cd, uid) {
+    // uid = e.g. "blue-1", "red-2" ฯลฯ  ทำให้ไม่มี ID ชนกันเลย
+    var cgId = 'cg-' + uid;
+    var shId = 'sh-' + uid;
+    var fgId = 'fg-' + uid;
+    var sgId = 'sg-' + uid;
+
+    return '<svg viewBox="0 0 64 88" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs>' +
+        '<radialGradient id="' + cgId + '" cx="45%" cy="30%" r="65%">' +
+          '<stop offset="0%" stop-color="' + cl + '"/>' +
+          '<stop offset="55%" stop-color="' + c  + '"/>' +
+          '<stop offset="100%" stop-color="' + cd + '"/>' +
+        '</radialGradient>' +
+        '<radialGradient id="' + shId + '" cx="30%" cy="25%" r="50%">' +
+          '<stop offset="0%" stop-color="white" stop-opacity="0.28"/>' +
+          '<stop offset="100%" stop-color="white" stop-opacity="0"/>' +
+        '</radialGradient>' +
+        '<radialGradient id="' + fgId + '" cx="35%" cy="30%" r="60%">' +
+          '<stop offset="0%" stop-color="#f8e68a"/>' +
+          '<stop offset="100%" stop-color="#8c6619"/>' +
+        '</radialGradient>' +
+        '<linearGradient id="' + sgId + '" x1="0%" y1="0%" x2="100%" y2="0%">' +
+          '<stop offset="0%" stop-color="#8c6619"/>' +
+          '<stop offset="40%" stop-color="#c9902a"/>' +
+          '<stop offset="100%" stop-color="#5a3218"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      '<circle cx="32" cy="5" r="5.5" fill="none" stroke="#d4a843" stroke-width="0.5" opacity="0.6"/>' +
+      '<circle cx="32" cy="5" r="4" fill="url(#' + fgId + ')" stroke="#8c6619" stroke-width="0.8"/>' +
+      '<path d="M6,36 Q6,10 32,8 Q58,10 58,36 Z" fill="url(#' + cgId + ')" stroke="' + cd + '" stroke-width="1.2"/>' +
+      '<path d="M6,36 Q6,10 32,8 Q58,10 58,36 Z" fill="url(#' + shId + ')"/>' +
+      '<line x1="32" y1="8" x2="6"  y2="36" stroke="' + cd + '" stroke-width="0.8" opacity="0.5"/>' +
+      '<line x1="32" y1="8" x2="19" y2="37" stroke="' + cd + '" stroke-width="0.8" opacity="0.5"/>' +
+      '<line x1="32" y1="8" x2="45" y2="37" stroke="' + cd + '" stroke-width="0.8" opacity="0.5"/>' +
+      '<line x1="32" y1="8" x2="58" y2="36" stroke="' + cd + '" stroke-width="0.8" opacity="0.5"/>' +
+      '<path d="M5,36 Q8,31 11,36 Q14,41 17,36 Q20,31 23,36 Q26,41 29,36 Q32,31 35,36 Q38,41 41,36 Q44,31 47,36 Q50,41 53,36 Q56,31 59,36" fill="' + c + '" stroke="' + cd + '" stroke-width="1" opacity="0.9"/>' +
+      '<path d="M5,36 Q8,31 11,36 Q14,41 17,36 Q20,31 23,36 Q26,41 29,36 Q32,31 35,36 Q38,41 41,36 Q44,31 47,36 Q50,41 53,36 Q56,31 59,36" fill="none" stroke="#d4a843" stroke-width="0.9" opacity="0.6"/>' +
+      '<rect x="30.5" y="36" width="3" height="36" rx="1.5" fill="url(#' + sgId + ')" stroke="#5a3218" stroke-width="0.5"/>' +
+      '<rect x="29.5" y="50" width="5" height="4" rx="1" fill="#d4a843" stroke="#8c6619" stroke-width="0.5"/>' +
+      '<path d="M32,72 Q32,80 24,80 Q18,80 18,74" fill="none" stroke="url(#' + sgId + ')" stroke-width="3" stroke-linecap="round"/>' +
+      '<circle cx="18" cy="74" r="2.2" fill="#d4a843" stroke="#8c6619" stroke-width="0.6"/>' +
+    '</svg>';
+  }
+
+})();
+</script>
+</body>
+</html>
