@@ -548,6 +548,22 @@ hr{border:none;border-top:1px solid rgba(212,168,67,.2);margin:12px 0;}
     played.push(exeId);
     localStorage.setItem('playedExeIds', JSON.stringify(played));
 
+    var totalCaught = finalScores.blue + finalScores.red + finalScores.yellow + finalScores.green;
+
+    if (totalCaught === 0) {
+      hud.style.display    = 'none';
+      basket.style.display = 'none';
+      resultContent.innerHTML =
+        '<div style="text-align:center;padding:32px 0;font-family:Mitr,sans-serif;">' +
+        '<div style="font-size:2.5rem;margin-bottom:14px;opacity:.5;">☂</div>' +
+        '<div style="color:rgba(240,204,122,.8);font-size:.95rem;line-height:2;">' +
+        'ไม่ได้จับร่มสักลูกเลย<br>' +
+        '<span style="color:rgba(240,204,122,.5);font-size:.8rem;">ไม่มีรางวัลสำหรับการเล่นนี้</span>' +
+        '</div></div>';
+      resultScreen.style.display = 'flex';
+      return;
+    }
+
     var winnerColor = getWinner(finalScores);
     var winnerItem  = null;
     for (var i = 0; i < UMBRELLAS.length; i++) {
