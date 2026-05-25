@@ -26,6 +26,7 @@ h1 { text-align: center; color: #d4a843; font-size: 1.6rem; letter-spacing: 3px;
 .btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
 .btn-green { background: #238636; color: #fff; }
 .btn-gray { background: #21262d; color: #e6edf3; border: 1px solid #30363d; }
+.btn-red { background: #6e2323; color: #ff9ea0; border: 1px solid #a43535; }
 .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #30363d; }
 table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 thead tr { background: #21262d; }
@@ -43,51 +44,147 @@ td { padding: 11px 14px; }
 .status-row { text-align: center; padding: 40px; color: #8b949e; }
 .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #30363d; border-top-color: #d4a843; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Login Screen ── */
+#loginScreen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; position: fixed; inset: 0; z-index: 999;
+  background: #0d1117;
+}
+.login-box {
+  background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+  padding: 40px 36px; width: min(400px, calc(100vw - 40px));
+  text-align: center;
+}
+.login-box h2 { color: #d4a843; font-size: 1.3rem; letter-spacing: 2px; margin-bottom: 6px; }
+.login-box .login-subtitle { color: #8b949e; font-size: 0.82rem; margin-bottom: 28px; }
+.login-box input {
+  width: 100%; padding: 10px 14px; margin-bottom: 12px;
+  background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+  color: #e6edf3; font-size: 0.95rem;
+}
+.login-box input:focus { outline: none; border-color: #d4a843; }
+.btn-gold {
+  width: 100%; padding: 11px; border-radius: 6px; border: none;
+  cursor: pointer; font-size: 0.95rem; font-weight: 700;
+  background: #d4a843; color: #0d1117; margin-top: 4px;
+  transition: background 0.2s;
+}
+.btn-gold:hover { background: #f0cc7a; }
+.login-error { color: #ff7b72; font-size: 0.82rem; margin-top: 10px; min-height: 20px; }
+
+/* ── Top bar with logout ── */
+#topBar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+#topBar .user-info { font-size: 0.8rem; color: #8b949e; margin-top: 4px; }
+
+/* ── Dashboard hidden until login ── */
+#dashboard { display: none; }
 </style>
 </head>
 <body>
-<h1>Admin Dashboard</h1>
-<p class="subtitle">GE Umbrella Event — บันทึกแห่งอาณาจักร</p>
-<div class="stats">
-  <div class="card"><div class="num" id="statTotal">-</div><div class="label">ผู้เล่นทั้งหมด</div></div>
-  <div class="card"><div class="num" id="statToday">-</div><div class="label">วันนี้</div></div>
-  <div class="card"><div class="num" id="statLeo">-</div><div class="label">Leonardo</div></div>
-  <div class="card"><div class="num" id="statSeason">-</div><div class="label">Season Server</div></div>
+
+<!-- ── Login Screen ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>ADMIN LOGIN</h2>
+    <p class="login-subtitle">GE Umbrella Event — เข้าถึงเฉพาะผู้ดูแล</p>
+    <input type="email" id="loginEmail" placeholder="อีเมล" autocomplete="username">
+    <input type="password" id="loginPass" placeholder="รหัสผ่าน" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-gold" onclick="doLogin()">เข้าสู่ระบบ</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
 </div>
-<div class="bars">
-  <h3>สัดส่วนร่มที่ชนะ</h3>
-  <div class="bar-row"><span class="bar-label" style="color:#79b8ff">น้ำเงิน</span><div class="bar-track"><div class="bar-fill" id="barBlue" style="background:#58a6ff;width:0%"></div></div><span class="bar-pct" id="pctBlue">0%</span></div>
-  <div class="bar-row"><span class="bar-label" style="color:#ff7b72">แดง</span><div class="bar-track"><div class="bar-fill" id="barRed" style="background:#ff7b72;width:0%"></div></div><span class="bar-pct" id="pctRed">0%</span></div>
-  <div class="bar-row"><span class="bar-label" style="color:#f0c040">เหลือง</span><div class="bar-track"><div class="bar-fill" id="barYellow" style="background:#f0c040;width:0%"></div></div><span class="bar-pct" id="pctYellow">0%</span></div>
-  <div class="bar-row"><span class="bar-label" style="color:#56d364">เขียว</span><div class="bar-track"><div class="bar-fill" id="barGreen" style="background:#56d364;width:0%"></div></div><span class="bar-pct" id="pctGreen">0%</span></div>
+
+<!-- ── Dashboard ── -->
+<div id="dashboard">
+  <div id="topBar">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p class="subtitle">GE Umbrella Event — บันทึกแห่งอาณาจักร</p>
+    </div>
+    <div style="text-align:right">
+      <div class="user-info" id="userInfo"></div>
+      <button class="btn btn-red" style="margin-top:6px" onclick="doLogout()">ออกจากระบบ</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="card"><div class="num" id="statTotal">-</div><div class="label">ผู้เล่นทั้งหมด</div></div>
+    <div class="card"><div class="num" id="statToday">-</div><div class="label">วันนี้</div></div>
+    <div class="card"><div class="num" id="statLeo">-</div><div class="label">Leonardo</div></div>
+    <div class="card"><div class="num" id="statSeason">-</div><div class="label">Season Server</div></div>
+  </div>
+
+  <div class="bars">
+    <h3>สัดส่วนร่มที่ชนะ</h3>
+    <div class="bar-row"><span class="bar-label" style="color:#79b8ff">น้ำเงิน</span><div class="bar-track"><div class="bar-fill" id="barBlue" style="background:#58a6ff;width:0%"></div></div><span class="bar-pct" id="pctBlue">0%</span></div>
+    <div class="bar-row"><span class="bar-label" style="color:#ff7b72">แดง</span><div class="bar-track"><div class="bar-fill" id="barRed" style="background:#ff7b72;width:0%"></div></div><span class="bar-pct" id="pctRed">0%</span></div>
+    <div class="bar-row"><span class="bar-label" style="color:#f0c040">เหลือง</span><div class="bar-track"><div class="bar-fill" id="barYellow" style="background:#f0c040;width:0%"></div></div><span class="bar-pct" id="pctYellow">0%</span></div>
+    <div class="bar-row"><span class="bar-label" style="color:#56d364">เขียว</span><div class="bar-track"><div class="bar-fill" id="barGreen" style="background:#56d364;width:0%"></div></div><span class="bar-pct" id="pctGreen">0%</span></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="ค้นหา EXE ID..." oninput="renderTable()">
+    <select id="filterColor" onchange="renderTable()">
+      <option value="">ร่มทุกสี</option><option value="blue">น้ำเงิน</option>
+      <option value="red">แดง</option><option value="yellow">เหลือง</option><option value="green">เขียว</option>
+    </select>
+    <select id="filterServer" onchange="renderTable()">
+      <option value="">ทุก Server</option>
+      <option value="Leonardo">Leonardo</option><option value="Season Server">Season Server</option>
+    </select>
+    <button class="btn btn-gray" onclick="loadData()">รีเฟรช</button>
+    <button class="btn btn-green" onclick="exportCSV()">Export CSV</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>EXE ID</th><th>Server</th><th>ร่มที่ได้</th><th>ของรางวัล</th><th>เวลาที่เล่น</th></tr></thead>
+      <tbody id="tableBody"><tr><td colspan="6" class="status-row"><span class="spinner"></span>กำลังโหลด...</td></tr></tbody>
+    </table>
+  </div>
 </div>
-<div class="toolbar">
-  <input type="text" id="searchBox" placeholder="ค้นหา EXE ID..." oninput="renderTable()">
-  <select id="filterColor" onchange="renderTable()"><option value="">ร่มทุกสี</option><option value="blue">น้ำเงิน</option><option value="red">แดง</option><option value="yellow">เหลือง</option><option value="green">เขียว</option></select>
-  <select id="filterServer" onchange="renderTable()"><option value="">ทุก Server</option><option value="Leonardo">Leonardo</option><option value="Season Server">Season Server</option></select>
-  <button class="btn btn-gray" onclick="loadData()">รีเฟรช</button>
-  <button class="btn btn-green" onclick="exportCSV()">Export CSV</button>
-</div>
-<div class="table-wrap">
-  <table>
-    <thead><tr><th>#</th><th>EXE ID</th><th>Server</th><th>ร่มที่ได้</th><th>ของรางวัล</th><th>เวลาที่เล่น</th></tr></thead>
-    <tbody id="tableBody"><tr><td colspan="6" class="status-row"><span class="spinner"></span>กำลังโหลด...</td></tr></tbody>
-  </table>
-</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script>
 const CFG={apiKey:"AIzaSyDqbGsBIkJzxqyLF3nNSLXCFRIze5la5qU",authDomain:"granado-espada-event.firebaseapp.com",databaseURL:"https://granado-espada-event-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"granado-espada-event",storageBucket:"granado-espada-event.firebasestorage.app",messagingSenderId:"293451160037",appId:"1:293451160037:web:517d07067ae1e6affc370c"};
 firebase.initializeApp(CFG);
 const db=firebase.database();
+const auth=firebase.auth();
 let all=[];
-function fmt(iso){if(!iso)return'-';const d=new Date(iso);return d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
-function badge(c,l){const m={blue:'badge-blue',red:'badge-red',yellow:'badge-yellow',green:'badge-green'};const e={blue:'น้ำเงิน',red:'แดง',yellow:'เหลือง',green:'เขียว'};return '<span class="badge '+(m[c]||'')+'">'+(e[c]||c)+'</span>';}
-function loadData(){document.getElementById('tableBody').innerHTML='<tr><td colspan="6" class="status-row"><span class="spinner"></span>กำลังโหลด...</td></tr>';db.ref('umbrella_results').once('value').then(s=>{const r=s.val();all=r?Object.values(r):[];all.sort((a,b)=>(b.playedAt||0)-(a.playedAt||0));stats();renderTable();}).catch(e=>{document.getElementById('tableBody').innerHTML='<tr><td colspan="6" class="status-row">โหลดไม่สำเร็จ: '+e.message+'</td></tr>';});}
-function stats(){const td=new Date().toDateString();let t=0,l=0,s=0,cc={blue:0,red:0,yellow:0,green:0};all.forEach(p=>{if(p.playedAtISO&&new Date(p.playedAtISO).toDateString()===td)t++;if(p.server==='Leonardo')l++;if(p.server==='Season Server')s++;if(p.winnerColor)cc[p.winnerColor]=(cc[p.winnerColor]||0)+1;});const n=all.length;document.getElementById('statTotal').textContent=n;document.getElementById('statToday').textContent=t;document.getElementById('statLeo').textContent=l;document.getElementById('statSeason').textContent=s;['blue','red','yellow','green'].forEach(c=>{const pct=n>0?Math.round((cc[c]||0)/n*100):0,k=c[0].toUpperCase()+c.slice(1);document.getElementById('bar'+k).style.width=pct+'%';document.getElementById('pct'+k).textContent=pct+'%';});}
-function renderTable(){const q=document.getElementById('searchBox').value.toLowerCase(),fc=document.getElementById('filterColor').value,fs=document.getElementById('filterServer').value;const f=all.filter(p=>{if(q&&!((p.exeId||'').toLowerCase().includes(q)||(p.server||'').toLowerCase().includes(q)))return false;if(fc&&p.winnerColor!==fc)return false;if(fs&&p.server!==fs)return false;return true;});const tb=document.getElementById('tableBody');if(!f.length){tb.innerHTML='<tr><td colspan="6" class="status-row">ไม่พบข้อมูล</td></tr>';return;}tb.innerHTML=f.map((p,i)=>'<tr><td style="color:#8b949e">'+(i+1)+'</td><td><strong>'+(p.exeId||'-')+'</strong></td><td><span class="server-tag">'+(p.server||'-')+'</span></td><td>'+badge(p.winnerColor,p.winnerLabel)+'</td><td>'+(p.reward||'-')+'</td><td class="time-cell">'+fmt(p.playedAtISO)+'</td></tr>').join('');}
-function exportCSV(){const q=document.getElementById('searchBox').value.toLowerCase(),fc=document.getElementById('filterColor').value,fs=document.getElementById('filterServer').value;const f=all.filter(p=>{if(q&&!((p.exeId||'').toLowerCase().includes(q)||(p.server||'').toLowerCase().includes(q)))return false;if(fc&&p.winnerColor!==fc)return false;if(fs&&p.server!==fs)return false;return true;});const h=['EXE ID','Server','ร่มที่ได้','ของรางวัล','เวลาที่เล่น'],rows=f.map(p=>[p.exeId||'',p.server||'',p.winnerLabel||p.winnerColor||'',p.reward||'',p.playedAtISO?new Date(p.playedAtISO).toLocaleString('th-TH'):'']);const csv=[h,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ge_umbrella_winners.csv';a.click();URL.revokeObjectURL(url);}
-loadData();
-</script>
-</body>
-</html>
+
+/* ── Auth State ── */
+auth.onAuthStateChanged(function(user){
+  if(user){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    document.getElementById('userInfo').textContent=user.email;
+    loadData();
+  } else {
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('dashboard').style.display='none';
+  }
+});
+
+function doLogin(){
+  var email=document.getElementById('loginEmail').value.trim();
+  var pass=document.getElementById('loginPass').value;
+  var errEl=document.getElementById('loginError');
+  errEl.textContent='';
+  if(!email||!pass){errEl.textContent='กรุณากรอกอีเมลและรหัสผ่าน';return;}
+  auth.signInWithEmailAndPassword(email,pass).catch(function(e){
+    errEl.textContent='เข้าสู่ระบบไม่สำเร็จ: รหัสผ่านหรืออีเมลไม่ถูกต้อง';
+  });
+}
+
+function doLogout(){auth.signOut();}
+
+/* ── Data ── */
+function fmt(iso){if(!iso)return'-';var d=new Date(iso);return d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+function badge(c,l){var m={blue:'badge-blue',red:'badge-red',yellow:'badge-yellow',green:'badge-green'};var e={blue:'น้ำเงิน',red:'แดง',yellow:'เหลือง',green:'เขียว'};return'<span class="badge '+(m[c]||'')+'">'+(e[c]||c)+'</span>';}
+function loadData(){document.getElementById('tableBody').innerHTML='<tr><td colspan="6" class="status-row"><span class="spinner"></span>กำลังโหลด...</td></tr>';db.ref('umbrella_results').once('value').then(function(s){var r=s.val();all=r?Object.values(r):[];all.sort(function(a,b){return(b.playedAt||0)-(a.playedAt||0);});stats();renderTable();}).catch(function(e){document.getElementById('tableBody').innerHTML='<tr><td colspan="6" class="status-row">โหลดไม่สำเร็จ: '+e.message+'</td></tr>';});}
+function stats(){var td=new Date().toDateString(),t=0,l=0,s=0,cc={blue:0,red:0,yellow:0,green:0};all.forEach(function(p){if(p.playedAtISO&&new Date(p.playedAtISO).toDateString()===td)t++;if(p.server==='Leonardo')l++;if(p.server==='Season Server')s++;if(p.winnerColor)cc[p.winnerColor]=(cc[p.winnerColor]||0)+1;});var n=all.length;document.getElementById('statTotal').textContent=n;document.getElementById('statToday').textContent=t;document.getElementById('statLeo').textContent=l;document.getElementById('statSeason').textContent=s;['blue','red','yellow','green'].forEach(function(c){var pct=n>0?Math.round((cc[c]||0)/n*100):0,k=c[0].toUpperCase()+c.slice(1);document.getElementById('bar'+k).style.width=pct+'%';document.getElementById('pct'+k).textContent=pct+'%';});}
+function renderTable(){var q=document.getElementById('searchBox').value.toLowerCase(),fc=document.getElementById('filterColor').value,fs=document.getElementById('filterServer').value;var f=all.filter(function(p){if(q&&!((p.exeId||'').toLowerCase().includes(q)||(p.server||'').toLowerCase().includes(q)))return false;if(fc&&p.winnerColor!==fc)return false;if(fs&&p.server!==fs)return false;return true;});var tb=document.getElementById('tableBody');if(!f.length){tb.innerHTML='<tr><td colspan="6" class="status-row">ไม่พบข้อมูล</td></tr>';return;}tb.innerHTML=f.map(function(p,i){return'<tr><td style="color:#8b949e">'+(i+1)+'</td><td><strong>'+(p.exeId||'-')+'</strong></td><td><span class="server-tag
